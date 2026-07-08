@@ -151,7 +151,7 @@ export default function AdminDashboard() {
                     <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{intervencao.titulo}</p>
-                      <p className="text-sm text-gray-600">ID: ...{intervencao.clienteId?.slice(-4)}</p>
+                      <p className="text-sm text-gray-600">Cliente: {intervencao.clienteNome || `...${intervencao.clienteId?.slice(-4)}`}</p>
                     </div>
                     <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">Alta</span>
                   </div>
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">Horas próximas do limite</p>
                       <p className="text-sm text-gray-600">
-                        Cliente {contrato.clienteId?.slice(-4)} - {contrato.horasUsadas}/{contrato.horasContratadas}h
+                        Cliente: {contrato.clienteNome || `...${contrato.clienteId?.slice(-4)}`} - {contrato.horasUsadas}/{contrato.horasContratadas}h
                       </p>
                     </div>
                     <span className="text-xs bg-yellow-600 text-white px-2 py-1 rounded">

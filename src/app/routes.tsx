@@ -8,8 +8,10 @@ import AdminContratos from "./pages/admin/Contratos";
 import AdminIntervencoes from "./pages/admin/Intervencoes";
 import AdminTecnicos from "./pages/admin/Tecnicos";
 import AdminRelatorios from "./pages/admin/Relatorios";
+import AdminAgenda from "./pages/admin/Agenda";
 import TecnicoDashboard from "./pages/tecnico/Dashboard";
 import TecnicoIntervencoes from "./pages/tecnico/Intervencoes";
+import TecnicoIntervencaoManual from "./pages/tecnico/IntervencaoManual";
 import TecnicoHoras from "./pages/tecnico/Horas";
 import ClienteDashboard from "./pages/cliente/Dashboard";
 import ClienteIntervencoes from "./pages/cliente/Intervencoes";
@@ -39,8 +41,10 @@ export const router = createBrowserRouter([
       { path: "clientes", Component: AdminClientes },
       { path: "contratos", Component: AdminContratos },
       { path: "intervencoes", Component: AdminIntervencoes },
+      { path: "intervencoes-manual", Component: TecnicoIntervencaoManual },
       { path: "tecnicos", Component: AdminTecnicos },
       { path: "relatorios", Component: AdminRelatorios },
+      { path: "agenda", Component: AdminAgenda },
     ],
   },
   {
@@ -51,6 +55,7 @@ export const router = createBrowserRouter([
       { index: true, Component: TecnicoDashboard },
       { path: "dashboard", Component: TecnicoDashboard },
       { path: "intervencoes", Component: TecnicoIntervencoes },
+      { path: "intervencoes-manual", Component: TecnicoIntervencaoManual },
       { path: "horas", Component: TecnicoHoras },
     ],
   },

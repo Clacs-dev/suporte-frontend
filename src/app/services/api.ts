@@ -262,26 +262,28 @@ export const intervencoesAPI = {
     return fetchAPI(`/intervencoes/tecnico/${tecnicoId}`);
   },
 
-  criar: async (intervencao: {
-    titulo: string;
-    descricao?: string;
-    clienteId: string;
-    tecnicoId?: string | null;
-    prioridade?: string;
-    categoria?: string;
-    anexos?: any[];
-  }) => {
+criar: async (intervencao: {
+  titulo: string;
+  descricao?: string;
+  clienteId: string;
+  tecnicoId?: string | null;
+  prioridade?: string;
+  categoria?: string;
+  data_agendada?: string | null;
+  anexos?: any[];
+}) => {
     return fetchAPI('/intervencoes', {
       method: 'POST',
-      body: JSON.stringify({
-        titulo: intervencao.titulo,
-        descricao: intervencao.descricao,
-        categoria: intervencao.categoria,
-        prioridade: intervencao.prioridade,
-        cliente_id: intervencao.clienteId,
-        tecnico_id: intervencao.tecnicoId,
-        anexos: intervencao.anexos,
-      }),
+  body: JSON.stringify({
+  titulo: intervencao.titulo,
+  descricao: intervencao.descricao,
+  categoria: intervencao.categoria,
+  prioridade: intervencao.prioridade,
+  cliente_id: intervencao.clienteId,
+  tecnico_id: intervencao.tecnicoId,
+  data_agendada: intervencao.data_agendada,
+  anexos: intervencao.anexos,
+}),
     });
   },
 

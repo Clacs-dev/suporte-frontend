@@ -235,10 +235,22 @@ export default function TecnicoIntervencoes() {
 
                   {/* Botão Resolver */}
                   {!["Resolvido", "Fechado", "Concluído"].includes(intervencao.status) && (
-                    <button onClick={() => handleResolver(intervencao)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
-                      <CheckCircle className="w-4 h-4" /> Resolver
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => navigate(`/tecnico/horas?intervencaoId=${intervencao.id}`)}
+                        className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Resolver Automaticamente
+                      </button>
+                      <button
+                        onClick={() => navigate(`/tecnico/intervencoes-manual?intervencaoId=${intervencao.id}`)}
+                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Resolver Manualmente
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

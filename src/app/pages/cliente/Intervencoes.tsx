@@ -28,6 +28,17 @@ export default function ClienteIntervencoes() {
     carregarClienteId();
   }, []);
 
+
+  const handleEliminar = async (id: string) => {
+    if (!confirm('Tem a certeza que quer eliminar esta intervenção?')) return
+    try {
+      await intervencoesAPI.deletar(id)
+      setIntervencoes(prev => prev.filter((i: any) => i.id !== id))
+    } catch {
+      alert('Erro ao eliminar intervenção.')
+    }
+  }
+
   useEffect(() => {
     if (clienteId) {
       carregarDados();
@@ -324,6 +335,14 @@ export default function ClienteIntervencoes() {
                     >
                       <CheckCircle className="w-4 h-4" />
                       Fechar e assinar Intervenção
+                    </button>
+                  )}
+                  {intervencao.status === "Aberto" && (
+                    <button
+                      onClick={() => handleEliminar(intervencao.id)}
+                      className="w-full lg:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      Eliminar Intervenção
                     </button>
                   )}
 

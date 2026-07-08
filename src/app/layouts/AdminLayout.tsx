@@ -1,15 +1,16 @@
 import { Outlet, useNavigate, useLocation } from "react-router";
-import { 
-  LayoutDashboard, 
-  Users, 
-  FileText, 
-  ClipboardList, 
-  Wrench, 
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  ClipboardList,
+  Wrench,
   BarChart3,
   Bell,
   LogOut,
   Menu,
-  X
+  X,
+  Calendar
 } from "lucide-react";
 import { useState } from "react";
 
@@ -19,11 +20,13 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const menuItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/admin/agenda", label: "Agenda", icon: Calendar },
     { path: "/admin/clientes", label: "Clientes", icon: Users },
     { path: "/admin/contratos", label: "Contratos", icon: FileText },
     { path: "/admin/intervencoes", label: "Intervenções", icon: ClipboardList },
     { path: "/admin/tecnicos", label: "Técnicos", icon: Wrench },
     { path: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
+
   ];
 
   const isActive = (path: string) => {
@@ -43,7 +46,7 @@ export default function AdminLayout() {
             <X className="w-6 h-6" />
           </button>
         </div>
-        
+
         <nav className="p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -54,11 +57,10 @@ export default function AdminLayout() {
                   navigate(item.path);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive(item.path)
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive(item.path)
                     ? "bg-blue-700 text-white"
                     : "text-blue-100 hover:bg-blue-800"
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span>{item.label}</span>
@@ -76,15 +78,15 @@ export default function AdminLayout() {
             <button onClick={() => setSidebarOpen(true)} className="md:hidden">
               <Menu className="w-6 h-6 text-gray-600" />
             </button>
-            
+
             <div className="flex-1 md:flex-none"></div>
-            
+
             <div className="flex items-center gap-4">
               <button className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <Bell className="w-5 h-5 text-gray-600" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
-              
+
               <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-semibold text-gray-800">Admin Utilizador</p>
@@ -94,7 +96,7 @@ export default function AdminLayout() {
                   A
                 </div>
               </div>
-              
+
               <button
                 onClick={() => navigate("/")}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"

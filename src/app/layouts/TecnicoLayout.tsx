@@ -1,12 +1,12 @@
 import { Outlet, useNavigate, useLocation } from "react-router";
-import { 
-  LayoutDashboard, 
-  ClipboardList, 
+import {
+  LayoutDashboard,
+  ClipboardList,
   Clock,
   Bell,
   LogOut,
   Menu,
-  X
+  X, FileText
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { tecnicosAPI } from "../services/api";
@@ -15,7 +15,7 @@ export default function TecnicoLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [tecnicoInfo, setTecnicoInfo] = useState<{nome: string; especialidade: string} | null>(null);
+  const [tecnicoInfo, setTecnicoInfo] = useState<{ nome: string; especialidade: string } | null>(null);
   const usuarioId = localStorage.getItem('userId');
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function TecnicoLayout() {
   const carregarDadosTecnico = async () => {
     try {
       if (!usuarioId) return;
-      
+
       const response = await tecnicosAPI.buscarPorUsuarioId(usuarioId);
       if (response.success && response.data) {
         setTecnicoInfo({
@@ -40,8 +40,8 @@ export default function TecnicoLayout() {
 
   const menuItems = [
     { path: "/tecnico", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/tecnico/intervencoes", label: "Minhas Intervenções", icon: ClipboardList },
-    { path: "/tecnico/horas", label: "Registo de Horas", icon: Clock },
+    { path: "/tecnico/intervencoes", label: "Intervenções", icon: ClipboardList },
+    { path: "/tecnico/horas", label: "Horas", icon: Clock },
   ];
 
   const isActive = (path: string) => {
@@ -61,7 +61,7 @@ export default function TecnicoLayout() {
             <X className="w-6 h-6" />
           </button>
         </div>
-        
+
         <nav className="p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -72,11 +72,10 @@ export default function TecnicoLayout() {
                   navigate(item.path);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive(item.path)
-                    ? "bg-green-700 text-white"
-                    : "text-green-100 hover:bg-green-800"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive(item.path)
+                  ? "bg-green-700 text-white"
+                  : "text-green-100 hover:bg-green-800"
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span>{item.label}</span>
@@ -94,15 +93,15 @@ export default function TecnicoLayout() {
             <button onClick={() => setSidebarOpen(true)} className="md:hidden">
               <Menu className="w-6 h-6 text-gray-600" />
             </button>
-            
+
             <div className="flex-1 md:flex-none"></div>
-            
+
             <div className="flex items-center gap-4">
               <button className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <Bell className="w-5 h-5 text-gray-600" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
-              
+
               <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-semibold text-gray-800">
@@ -113,13 +112,13 @@ export default function TecnicoLayout() {
                   </p>
                 </div>
                 <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  {tecnicoInfo?.nome 
+                  {tecnicoInfo?.nome
                     ? tecnicoInfo.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
                     : 'TC'
                   }
                 </div>
               </div>
-              
+
               <button
                 onClick={() => navigate("/")}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"

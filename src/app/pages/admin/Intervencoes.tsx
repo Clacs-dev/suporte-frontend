@@ -24,7 +24,7 @@ export default function AdminIntervencoes() {
 
   const [formData, setFormData] = useState({
     clienteId: "", tecnicoId: "", titulo: "", descricao: "",
-    categoria: "Geral", prioridade: "Média", status: "Aberto"
+    categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "",
   });
 
   const [formEditar, setFormEditar] = useState({
@@ -59,11 +59,12 @@ export default function AdminIntervencoes() {
         titulo: formData.titulo, descricao: formData.descricao,
         categoria: formData.categoria, prioridade: formData.prioridade,
         clienteId: formData.clienteId, tecnicoId: formData.tecnicoId || null,
+        data_agendada: formData.dataAgendada || null,
         anexos: arquivosAnexados
       });
       if (response.success) {
         setMostrarFormulario(false);
-        setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto" });
+        setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "" });
         setArquivosAnexados([]);
         carregarDados();
         alert('Intervenção criada com sucesso!');
@@ -260,6 +261,15 @@ export default function AdminIntervencoes() {
               <textarea rows={4} value={formData.descricao} onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
                 placeholder="Forneça mais detalhes..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Data Agendada</label>
+              <input
+                type="datetime-local"
+                value={formData.dataAgendada}
+                onChange={e => setFormData({ ...formData, dataAgendada: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
