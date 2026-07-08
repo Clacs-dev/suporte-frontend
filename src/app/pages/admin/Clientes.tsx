@@ -11,6 +11,7 @@ export default function AdminClientes() {
   const [clienteEditando, setClienteEditando] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: "",
+    empresa: '',
     email: "",
     telefone: "",
     senha: "",
@@ -34,10 +35,10 @@ export default function AdminClientes() {
   const abrirModal = (cliente?: any) => {
     if (cliente) {
       setClienteEditando(cliente);
-      setFormData({ nome: cliente.nome, email: cliente.email, telefone: cliente.telefone || "", senha: "", status: cliente.status });
+      setFormData({ nome: cliente.nome, empresa: cliente.empresa, email: cliente.email, telefone: cliente.telefone || "", senha: "", status: cliente.status });
     } else {
       setClienteEditando(null);
-      setFormData({ nome: "", email: "", telefone: "", senha: "", status: "Ativo" });
+      setFormData({ nome: "", empresa: "", email: "", telefone: "", senha: "", status: "Ativo" });
     }
     setModalAberto(true);
   };
@@ -45,7 +46,7 @@ export default function AdminClientes() {
   const fecharModal = () => {
     setModalAberto(false);
     setClienteEditando(null);
-    setFormData({ nome: "", email: "", telefone: "", senha: "", status: "Ativo" });
+    setFormData({ nome: "", empresa: "", email: "", telefone: "", senha: "", status: "Ativo" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,7 +55,8 @@ export default function AdminClientes() {
       if (clienteEditando) {
         const response = await clientesAPI.atualizar(clienteEditando.id, formData);
         if (response.success) {
-          setClientes(clientes.map(c => c.id === clienteEditando.id ? { ...c, ...response.data } : c));
+          const res = await clientesAPI.listar();
+          if (res.success) setClientes(res.data);
           alert('Cliente actualizado com sucesso!');
           fecharModal();
         } else {
@@ -224,6 +226,12 @@ export default function AdminClientes() {
                 <input type="text" required value={formData.nome}
                   onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nome do cliente" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
+                <input type="text" value={formData.empresa}
+                  onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nome da empresa" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
