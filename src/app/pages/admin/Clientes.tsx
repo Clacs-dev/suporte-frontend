@@ -1,4 +1,4 @@
-import { Search, Plus, Edit, Trash2, CheckCircle, XCircle, Loader, X } from "lucide-react";
+import { Search, Plus, Edit, Trash2, CheckCircle, XCircle, Loader, X, Eye, EyeOff } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { clientesAPI } from "../../services/api";
 
@@ -8,6 +8,7 @@ export default function AdminClientes() {
   const [loading, setLoading] = useState(true);
   const [filtroStatus, setFiltroStatus] = useState("Todos");
   const [modalAberto, setModalAberto] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [clienteEditando, setClienteEditando] = useState<any>(null);
   const [formData, setFormData] = useState({
     nome: "",
@@ -248,11 +249,17 @@ export default function AdminClientes() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Senha {!clienteEditando && '*'}</label>
-                <input type="password" required={!clienteEditando} value={formData.senha}
-                  onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
-                  autoComplete="new-password"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={clienteEditando ? "Deixe em branco para não alterar" : "Senha de acesso"} />
+                <div className="relative">
+                  <input type={mostrarSenha ? "text" : "password"} required={!clienteEditando} value={formData.senha}
+                    onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                    autoComplete="new-password"
+                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={clienteEditando ? "Deixe em branco para não alterar" : "Senha de acesso"} />
+                  <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {mostrarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
