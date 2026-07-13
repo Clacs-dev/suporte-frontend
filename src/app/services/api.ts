@@ -145,6 +145,7 @@ export const clientesAPI = {
     telefone?: string;
     senha?: string;
     status?: string;
+    empresa?: string;
   }) => {
     console.log('=== API FRONTEND: clientesAPI.criar() chamado ===');
     console.log('Dados recebidos:', {
