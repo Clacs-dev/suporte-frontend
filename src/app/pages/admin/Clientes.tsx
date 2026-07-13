@@ -220,7 +220,7 @@ export default function AdminClientes() {
               <h2 className="text-xl font-bold text-gray-900">{clienteEditando ? 'Editar Cliente' : 'Novo Cliente'}</h2>
               <button onClick={fecharModal} className="text-gray-400 hover:text-gray-600"><X className="w-6 h-6" /></button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4" autoComplete="off">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
                 <input type="text" required value={formData.nome}
@@ -237,6 +237,7 @@ export default function AdminClientes() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                 <input type="email" required value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  autoComplete="off"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="email@exemplo.com" />
               </div>
               <div>
@@ -249,6 +250,7 @@ export default function AdminClientes() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Senha {!clienteEditando && '*'}</label>
                 <input type="password" required={!clienteEditando} value={formData.senha}
                   onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
+                  autoComplete="new-password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={clienteEditando ? "Deixe em branco para não alterar" : "Senha de acesso"} />
               </div>
