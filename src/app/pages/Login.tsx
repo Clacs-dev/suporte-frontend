@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { LogIn, User, Lock, Loader, RefreshCw } from 'lucide-react';
+import { LogIn, User, Lock, Loader, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '../services/api';
 
 export default function Login() {
@@ -10,6 +10,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
   const [showReset, setShowReset] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const handleReset = () => {
     if (confirm('Deseja limpar todos os dados do localStorage? Isto irá requerer uma nova inicialização do sistema.')) {
@@ -26,13 +27,13 @@ export default function Login() {
     try {
       console.log('=== INICIANDO LOGIN ===');
       console.log('Email:', email);
-      
+
       const response = await authAPI.login({ email, password: senha });
       console.log('Resposta do login:', response);
 
       if (response.success) {
         const { session, profile, tecnicoId, clienteId } = response.data;
-        
+
         console.log('Login bem-sucedido!');
         console.log('Profile:', profile);
         console.log('TecnicoId recebido:', tecnicoId);
@@ -138,16 +139,26 @@ export default function Login() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type="password"
+                  type={mostrarSenha ? "text" : "password"}
                   required
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="••••••••"
                   disabled={loading}
+                  autoComplete="current-password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  disabled={loading}
+                >
+                  {mostrarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
+
 
             <button
               type="submit"
@@ -172,7 +183,7 @@ export default function Login() {
         {/* Footer */}
         <div className="text-center mt-6 text-sm text-gray-600">
           <p>Sistema CLACS - Angola</p>
-          
+
         </div>
       </div>
     </div>
