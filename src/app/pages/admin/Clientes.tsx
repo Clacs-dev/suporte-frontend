@@ -111,7 +111,7 @@ export default function AdminClientes() {
 
   const filteredClientes = clientes.filter(cliente => {
     const matchSearch = cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cliente.email.toLowerCase().includes(searchTerm.toLowerCase());
+      (cliente.empresa || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = filtroStatus === "Todos" || cliente.status === filtroStatus;
     return matchSearch && matchStatus;
   });
@@ -145,7 +145,7 @@ export default function AdminClientes() {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input type="text" placeholder="Buscar por nome ou email..." value={searchTerm}
+            <input type="text" placeholder="Buscar por nome da empresa ou nome do cliente..." value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
@@ -169,7 +169,7 @@ export default function AdminClientes() {
             <div key={cliente.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">{cliente.email}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{cliente.empresa || cliente.nome}</h3>
                   <p className="text-sm text-gray-600">{cliente.nome}</p>
                 </div>
                 <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${cliente.status === "Ativo" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
