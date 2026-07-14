@@ -1,4 +1,4 @@
-import { FileText, Plus, AlertCircle, TrendingUp, Clock, Loader, X, Calendar, DollarSign, Edit, Trash2 } from "lucide-react";
+import { FileText, Plus, AlertCircle, TrendingUp, Clock, Loader, X, Calendar, DollarSign, Edit, Trash2, Search } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { contratosAPI, clientesAPI } from "../../services/api";
 
@@ -8,6 +8,7 @@ export default function AdminContratos() {
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
   const [contratoEditando, setContratoEditando] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
     clienteId: "",
     tipo: "Mensal",
@@ -116,6 +117,7 @@ export default function AdminContratos() {
   }
 
   const contratosAtivos = contratos.filter(c => c.status === "Ativo");
+  const contratosFiltrados = contratos.filter(c => (c.clienteNome || "").toLowerCase().includes(searchTerm.toLowerCase()));
   const faturamentoMensal = contratos.reduce((acc, c) => acc + (c.valorMensal ?? c.valor_mensal ?? 0), 0);
   const horasDisponiveis = contratos.reduce((acc, c) => {
     const hc = c.horasContratadas ?? c.horas_contratadas ?? 0;
@@ -134,6 +136,16 @@ export default function AdminContratos() {
           className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
           <Plus className="w-5 h-5" /> Novo Contrato
         </button>
+      </div>
+
+      {/* Busca */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input type="text" placeholder="Buscar por nome do cliente..." value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
       </div>
 
       {/* Resumo */}
@@ -174,13 +186,13 @@ export default function AdminContratos() {
       </div>
 
       {/* Lista */}
-      {contratos.length === 0 ? (
+      {contratosFiltrados.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <p className="text-gray-500">Nenhum contrato cadastrado</p>
+          <p className="text-gray-500">{searchTerm ? "Nenhum contrato encontrado" : "Nenhum contrato cadastrado"}</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {contratos.map(contrato => {
+          {contratosFiltrados.map(contrato => {
             const hc = contrato.horasContratadas ?? contrato.horas_contratadas ?? 0;
             const hu = contrato.horasUsadas ?? contrato.horas_usadas ?? 0;
             const percentual = hc > 0 && contrato.tipo !== "Por Hora" ? (hu / hc) * 100 : 0;

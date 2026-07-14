@@ -169,8 +169,8 @@ export default function AdminClientes() {
             <div key={cliente.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">{cliente.nome}</h3>
-                  <p className="text-sm text-gray-600">{cliente.email}</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{cliente.email}</h3>
+                  <p className="text-sm text-gray-600">{cliente.nome}</p>
                 </div>
                 <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${cliente.status === "Ativo" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
                   {cliente.status === "Ativo" ? <><CheckCircle className="w-3 h-3" /> Ativo</> : <><XCircle className="w-3 h-3" /> Inativo</>}
@@ -223,16 +223,16 @@ export default function AdminClientes() {
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto" autoComplete="off">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
-                <input type="text" required value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nome do cliente" />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
                 <input type="text" value={formData.empresa}
                   onChange={(e) => setFormData({ ...formData, empresa: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nome da empresa" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+                <input type="text" required value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nome do cliente" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
@@ -254,7 +254,7 @@ export default function AdminClientes() {
                     onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
                     autoComplete="new-password"
                     className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder={clienteEditando ? "Deixe em branco para não alterar" : "Senha de acesso"} />
+                    placeholder={clienteEditando ? "Alterar senha" : "Senha de acesso"} />
                   <button type="button" onClick={() => setMostrarSenha(!mostrarSenha)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                     {mostrarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
