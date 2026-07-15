@@ -1,4 +1,4 @@
-import { Plus, Star, Clock, ClipboardList, TrendingUp, Loader, X, Link, Edit, Trash2 } from "lucide-react";
+import { Plus, Star, Clock, ClipboardList, TrendingUp, Loader, X, Link, Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { intervencoesAPI, tecnicosAPI } from "../../services/api";
 
@@ -7,6 +7,7 @@ export default function AdminTecnicos() {
   const [tecnicos, setTecnicos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
+  const [mostrarSenhaEditar, setMostrarSenhaEditar] = useState(false);
   const [modalVincularAberto, setModalVincularAberto] = useState(false);
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
   const [tecnicoSelecionado, setTecnicoSelecionado] = useState<any>(null);
@@ -22,6 +23,7 @@ export default function AdminTecnicos() {
   const [formEditar, setFormEditar] = useState({
     nome: "",
     email: "",
+    senha: "",
     nivel: "Júnior",
     especialidade: "Geral"
   });
@@ -62,9 +64,11 @@ export default function AdminTecnicos() {
     setFormEditar({
       nome: tecnico.nome || "",
       email: tecnico.email || "",
+      senha: "",
       nivel: tecnico.nivel || "Júnior",
       especialidade: tecnico.especialidade || "Geral"
     });
+    setMostrarSenhaEditar(false);
     setModalEditarAberto(true);
   };
 
@@ -91,7 +95,9 @@ export default function AdminTecnicos() {
     e.preventDefault();
     if (!tecnicoEditando) return;
     try {
-      const response = await tecnicosAPI.atualizar(tecnicoEditando.id, formEditar);
+      const dadosParaEnviar: any = { ...formEditar };
+      if (!dadosParaEnviar.senha) delete dadosParaEnviar.senha;
+      const response = await tecnicosAPI.atualizar(tecnicoEditando.id, dadosParaEnviar);
       if (response.success) {
         fecharModalEditar();
         alert('Técnico actualizado com sucesso!');
@@ -380,6 +386,19 @@ export default function AdminTecnicos() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                 <input type="email" required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={formEditar.email} onChange={(e) => setFormEditar({ ...formEditar, email: e.target.value })} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
+                <div className="relative">
+                  <input type={mostrarSenhaEditar ? "text" : "password"} autoComplete="new-password"
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Alterar Senha"
+                    value={formEditar.senha} onChange={(e) => setFormEditar({ ...formEditar, senha: e.target.value })} />
+                  <button type="button" onClick={() => setMostrarSenhaEditar(!mostrarSenhaEditar)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {mostrarSenhaEditar ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nível</label>

@@ -334,7 +334,7 @@ export default function ClienteIntervencoes() {
                       className="w-full lg:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                     >
                       <CheckCircle className="w-4 h-4" />
-                      Fechar e assinar Intervenção
+                      Fechar a Intervenção
                     </button>
                   )}
                   {intervencao.status === "Aberto" && (
@@ -352,7 +352,7 @@ export default function ClienteIntervencoes() {
                       className="w-full lg:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
                     >
                       <FileText className="w-4 h-4" />
-                      Baixar Relatório (PDF)
+                      Baixar e assinar Relatório (PDF)
                     </button>
                   )}
 
