@@ -1,4 +1,5 @@
 import { Outlet, useNavigate, useLocation } from "react-router";
+import PerfilDropdown from "../components/PerfilDropdown";
 import {
   LayoutDashboard,
   Users,
@@ -18,6 +19,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mostrarPerfil, setMostrarPerfil] = useState(false);
   const menuItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/agenda", label: "Agenda", icon: Calendar },
@@ -87,14 +89,17 @@ export default function AdminLayout() {
                 <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
 
-              <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-semibold text-gray-800">{localStorage.getItem('userName') || 'Utilizador'}</p>
-                  <p className="text-xs text-gray-500">{localStorage.getItem('userEmail') || ''}</p>
-                </div>
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  {(localStorage.getItem('userName') || 'U').charAt(0).toUpperCase()}
-                </div>
+              <div className="relative">
+                <button onClick={() => setMostrarPerfil(!mostrarPerfil)} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-sm font-semibold text-gray-800">{localStorage.getItem('userName') || 'Utilizador'}</p>
+                    <p className="text-xs text-gray-500">{localStorage.getItem('userEmail') || ''}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                    {(localStorage.getItem('userName') || 'U').charAt(0).toUpperCase()}
+                  </div>
+                </button>
+                {mostrarPerfil && <PerfilDropdown onClose={() => setMostrarPerfil(false)} />}
               </div>
 
               <button

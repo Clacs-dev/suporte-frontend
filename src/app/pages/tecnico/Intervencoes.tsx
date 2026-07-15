@@ -195,7 +195,7 @@ export default function TecnicoIntervencoes() {
                       <h3 className="font-semibold text-gray-900 mb-1">{intervencao.titulo}</h3>
                       <p className="text-sm text-gray-600 mb-3">{intervencao.descricao}</p>
                       <div className="flex flex-wrap gap-3 text-sm">
-                        <div className="flex items-center gap-2"><span className="text-gray-500">Cliente:</span><span className="font-medium text-gray-900">{intervencao.clienteNome}</span></div>
+                        <div className="flex items-center gap-2"><span className="text-gray-500">Cliente:</span><span className="font-medium text-gray-900">{intervencao.empresaNome || intervencao.clienteNome}</span></div>
                         <div className="flex items-center gap-2"><span className="text-gray-500">Categoria:</span><span className="font-medium text-gray-900">{intervencao.categoria}</span></div>
                         <div className="flex items-center gap-2"><span className="text-gray-500">Criado:</span><span className="font-medium text-gray-900">{new Date(intervencao.dataCriacao).toLocaleDateString('pt-AO')}</span></div>
                       </div>

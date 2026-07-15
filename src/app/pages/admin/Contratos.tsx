@@ -89,7 +89,7 @@ export default function AdminContratos() {
   };
 
   const handleEliminar = async (contrato: any) => {
-    if (!confirm(`Tem certeza que deseja eliminar o contrato de "${contrato.clienteNome || 'este cliente'}"?`)) return;
+    if (!confirm(`Tem certeza que deseja eliminar o contrato de "${contrato.empresaNome || contrato.clienteNome || 'este cliente'}"?`)) return;
 
     try {
       const response = await contratosAPI.deletar(contrato.id.toString());
@@ -117,7 +117,10 @@ export default function AdminContratos() {
   }
 
   const contratosAtivos = contratos.filter(c => c.status === "Ativo");
-  const contratosFiltrados = contratos.filter(c => (c.clienteNome || "").toLowerCase().includes(searchTerm.toLowerCase()));
+  const contratosFiltrados = contratos.filter(c =>
+    (c.empresaNome || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (c.clienteNome || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const faturamentoMensal = contratos.reduce((acc, c) => acc + (c.valorMensal ?? c.valor_mensal ?? 0), 0);
   const horasDisponiveis = contratos.reduce((acc, c) => {
     const hc = c.horasContratadas ?? c.horas_contratadas ?? 0;
@@ -205,7 +208,7 @@ export default function AdminContratos() {
                     <div className="flex items-start justify-between w-full gap-4 mb-3">
                       <div className="flex items-center gap-3 flex-wrap">
                         <h3 className="text-lg font-semibold text-gray-900">
-                          {contrato.clienteNome || 'Cliente não encontrado'}
+                          {contrato.empresaNome || contrato.clienteNome || 'Cliente não encontrado'}
                         </h3>
                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${contrato.status === "Ativo" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
                           {contrato.status}

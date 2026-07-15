@@ -9,6 +9,7 @@ import AdminIntervencoes from "./pages/admin/Intervencoes";
 import AdminTecnicos from "./pages/admin/Tecnicos";
 import AdminRelatorios from "./pages/admin/Relatorios";
 import AdminAgenda from "./pages/admin/Agenda";
+import AdminPerfil from "./pages/admin/Perfil";
 import TecnicoDashboard from "./pages/tecnico/Dashboard";
 import TecnicoIntervencoes from "./pages/tecnico/Intervencoes";
 import TecnicoIntervencaoManual from "./pages/tecnico/IntervencaoManual";
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
       { path: "tecnicos", Component: AdminTecnicos },
       { path: "relatorios", Component: AdminRelatorios },
       { path: "agenda", Component: AdminAgenda },
+      { path: "perfil", Component: AdminPerfil },
     ],
   },
   {

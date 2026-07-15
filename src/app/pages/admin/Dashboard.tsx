@@ -151,7 +151,7 @@ export default function AdminDashboard() {
                     <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{intervencao.titulo}</p>
-                      <p className="text-sm text-gray-600">Cliente: {intervencao.clienteNome || `...${intervencao.clienteId?.slice(-4)}`}</p>
+                      <p className="text-sm text-gray-600">Cliente: {intervencao.empresaNome || intervencao.clienteNome || `...${intervencao.clienteId?.slice(-4)}`}</p>
                     </div>
                     <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">Alta</span>
                   </div>
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">Horas próximas do limite</p>
                       <p className="text-sm text-gray-600">
-                        Cliente: {contrato.clienteNome || `...${contrato.clienteId?.slice(-4)}`} - {contrato.horasUsadas}/{contrato.horasContratadas}h
+                        Cliente: {contrato.empresaNome || contrato.clienteNome || `...${contrato.clienteId?.slice(-4)}`} - {contrato.horasUsadas}/{contrato.horasContratadas}h
                       </p>
                     </div>
                     <span className="text-xs bg-yellow-600 text-white px-2 py-1 rounded">
@@ -239,7 +239,7 @@ export default function AdminDashboard() {
                   <tr key={intervencao.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm text-gray-600">{intervencao.numero}</td>
                     <td className="py-3 px-4 text-sm font-medium text-gray-900">{intervencao.titulo}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{intervencao.clienteNome}</td>
+                    <td className="py-3 px-4 text-sm text-gray-600">{intervencao.empresaNome || intervencao.clienteNome}</td>
                     <td className="py-3 px-4 text-sm text-gray-600">{intervencao.tecnicoNome || '-'}</td>
                     <td className="py-3 px-4">
                       <span className={`text-xs px-2 py-1 rounded ${intervencao.prioridade === "Alta" ? "bg-red-100 text-red-700" :

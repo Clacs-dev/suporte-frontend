@@ -250,8 +250,8 @@ export default function AdminRelatorios() {
                 <div className="flex items-center gap-3">
                   <span className="text-lg font-bold text-gray-400">#{index + 1}</span>
                   <div>
-                    <p className="font-semibold text-gray-900">{cliente.nome}</p>
-                    <p className="text-sm text-gray-600">{cliente.email}</p>
+                    <p className="font-semibold text-gray-900">{cliente.empresa || cliente.nome}</p>
+                    <p className="text-sm text-gray-600">{cliente.nome}</p>
                   </div>
                 </div>
                 <div className="text-right">

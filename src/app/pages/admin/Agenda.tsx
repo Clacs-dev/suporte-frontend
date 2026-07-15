@@ -64,7 +64,7 @@ export default function AdminAgenda() {
     return intervencoes.filter(i => {
       if (filterTecnico && i.tecnicoNome !== filterTecnico) return false
       if (filterStatus && i.status !== filterStatus) return false
-      if (filterCliente && !i.clienteNome?.toLowerCase().includes(filterCliente.toLowerCase())) return false
+      if (filterCliente && !(i.empresaNome?.toLowerCase().includes(filterCliente.toLowerCase()) || i.clienteNome?.toLowerCase().includes(filterCliente.toLowerCase()))) return false
       if (filterIntervencao && !i.titulo?.toLowerCase().includes(filterIntervencao.toLowerCase())) return false
       if (filterDataCriacao && !i.dataCriacao?.startsWith(filterDataCriacao)) return false
       return true
@@ -197,7 +197,7 @@ export default function AdminAgenda() {
             <option value="Concluído">Concluído</option>
           </select>
           <input value={filterCliente} onChange={e => setFilterCliente(e.target.value)}
-            placeholder="Filtrar por cliente..."
+            placeholder="Filtrar por empresa ou cliente..."
             className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500" />
           <input value={filterIntervencao} onChange={e => setFilterIntervencao(e.target.value)}
             placeholder="Filtrar por intervenção..."

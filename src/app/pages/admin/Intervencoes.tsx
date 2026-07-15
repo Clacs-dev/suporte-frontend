@@ -1,4 +1,4 @@
-import { Search, Plus, Filter, Upload, File, X, Loader, Edit, CheckCircle, FileText, Trash2 } from "lucide-react";
+import { Search, Plus, Filter, Upload, File, X, Loader, Edit, CheckCircle, FileText, Trash2, MoreVertical } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { intervencoesAPI, clientesAPI, tecnicosAPI } from "../../services/api";
 const API_BASE_URL = window.location.hostname === "localhost"
@@ -20,6 +20,7 @@ export default function AdminIntervencoes() {
   const [tecnicos, setTecnicos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarPDF, setMostrarPDF] = useState(false);
+  const [menuAbertoId, setMenuAbertoId] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState("");
 
   const [formData, setFormData] = useState({
@@ -237,7 +238,7 @@ export default function AdminIntervencoes() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="">Selecione o cliente...</option>
                   {clientes.filter(c => c.status === "Ativo").map(c => (
-                    <option key={c.id} value={c.id}>{c.nome}</option>
+                    <option key={c.id} value={c.id}>{c.empresa || c.nome}</option>
                   ))}
                 </select>
               </div>
@@ -381,7 +382,7 @@ export default function AdminIntervencoes() {
                         <h3 className="font-semibold text-gray-900 mb-1">{intervencao.titulo}</h3>
                         <p className="text-sm text-gray-600 mb-3">{intervencao.descricao}</p>
                         <div className="flex flex-wrap gap-3 text-sm">
-                          <div className="flex items-center gap-2"><span className="text-gray-500">Cliente:</span><span className="font-medium text-gray-900">{cliente ? cliente.nome : intervencao.clienteNome || 'N/A'}</span></div>
+                          <div className="flex items-center gap-2"><span className="text-gray-500">Cliente:</span><span className="font-medium text-gray-900">{cliente ? (cliente.empresa || cliente.nome) : (intervencao.empresaNome || intervencao.clienteNome || 'N/A')}</span></div>
                           <div className="flex items-center gap-2"><span className="text-gray-500">Técnico:</span><span className="font-medium text-gray-900">{tecnico ? tecnico.nome : intervencao.tecnicoNome || 'Não atribuído'}</span></div>
                           <div className="flex items-center gap-2"><span className="text-gray-500">Categoria:</span><span className="font-medium text-gray-900">{intervencao.categoria}</span></div>
                           <div className="flex items-center gap-2"><span className="text-gray-500">Criado:</span><span className="font-medium text-gray-900">{new Date(intervencao.dataCriacao).toLocaleDateString('pt-AO')}</span></div>
@@ -398,45 +399,53 @@ export default function AdminIntervencoes() {
                     </div>
                   </div>
 
-                  <div className="lg:text-right space-y-2">
+                  <div className="lg:text-right space-y-2 relative">
                     <div className="bg-blue-50 px-4 py-2 rounded-lg">
                       <p className="text-xs text-blue-600 mb-1">Horas Gastas</p>
                       <p className="text-2xl font-bold text-blue-700">{Number(intervencao.horasGastas || intervencao.horas_gastas || 0).toFixed(2)}h</p>
                     </div>
 
-                    <button onClick={() => handleDownloadPDF(intervencao.id)}
+                    <button onClick={() => setMenuAbertoId(menuAbertoId === intervencao.id ? null : intervencao.id)}
                       className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg transition-colors">
-                      <FileText className="w-4 h-4" /> Baixar PDF
+                      <MoreVertical className="w-4 h-4" /> Ações
                     </button>
 
-                    {/* Botão Editar — sempre visível */}
-                    <button onClick={() => abrirEdicaoCompleta(intervencao)}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm rounded-lg transition-colors">
-                      <Edit className="w-4 h-4" /> Editar
-                    </button>
+                    {menuAbertoId === intervencao.id && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setMenuAbertoId(null)} />
+                        <div className="absolute right-full top-0 mr-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden">
+                          <button onClick={() => { handleDownloadPDF(intervencao.id); setMenuAbertoId(null); }}
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <FileText className="w-4 h-4" /> Baixar PDF
+                          </button>
 
-                    {/* Botão Eliminar */}
-                    {!["Concluído", "Resolvido"].includes(intervencao.status) && (
-                      <button onClick={() => handleEliminarIntervencao(intervencao.id)}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4" /> Eliminar
-                      </button>
-                    )}
+                          <button onClick={() => { abrirEdicaoCompleta(intervencao); setMenuAbertoId(null); }}
+                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-blue-700 hover:bg-blue-50 transition-colors">
+                            <Edit className="w-4 h-4" /> Editar
+                          </button>
 
-                    {/* Botão Atribuir Técnico */}
-                    {!["Concluído", "Resolvido", "Fechado"].includes(intervencao.status) && (
-                      <button onClick={() => abrirEdicaoTecnico(intervencao)}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 text-sm rounded-lg transition-colors">
-                        <Edit className="w-4 h-4" /> Atribuir Técnico
-                      </button>
-                    )}
+                          {!["Concluído", "Resolvido", "Fechado"].includes(intervencao.status) && (
+                            <button onClick={() => { abrirEdicaoTecnico(intervencao); setMenuAbertoId(null); }}
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-purple-700 hover:bg-purple-50 transition-colors">
+                              <Edit className="w-4 h-4" /> Atribuir Técnico
+                            </button>
+                          )}
 
-                    {/* Botão Concluir */}
-                    {intervencao.status === "Fechado" && (
-                      <button onClick={() => handleConcluirIntervencao(intervencao.id)}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors">
-                        <CheckCircle className="w-4 h-4" /> Concluir
-                      </button>
+                          {intervencao.status === "Fechado" && (
+                            <button onClick={() => { handleConcluirIntervencao(intervencao.id); setMenuAbertoId(null); }}
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-green-700 hover:bg-green-50 transition-colors">
+                              <CheckCircle className="w-4 h-4" /> Concluir
+                            </button>
+                          )}
+
+                          {!["Concluído", "Resolvido"].includes(intervencao.status) && (
+                            <button onClick={() => { handleEliminarIntervencao(intervencao.id); setMenuAbertoId(null); }}
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-700 hover:bg-red-50 transition-colors border-t border-gray-100">
+                              <Trash2 className="w-4 h-4" /> Eliminar
+                            </button>
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
