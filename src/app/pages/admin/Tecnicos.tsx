@@ -1,6 +1,7 @@
 import { Plus, Star, Clock, ClipboardList, TrendingUp, Loader, X, Link, Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { intervencoesAPI, tecnicosAPI } from "../../services/api";
+import { toast } from "sonner";
 
 export default function AdminTecnicos() {
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
@@ -83,11 +84,11 @@ export default function AdminTecnicos() {
       const response = await tecnicosAPI.criar(formData);
       if (response.success) {
         fecharModal();
-        alert('Técnico criado com sucesso!');
+        toast.success('Técnico criado com sucesso!');
         carregarDados();
       }
     } catch (error: any) {
-      alert(error.message || 'Erro ao criar técnico');
+      toast.error(error.message || 'Erro ao criar técnico');
     }
   };
 
@@ -100,13 +101,13 @@ export default function AdminTecnicos() {
       const response = await tecnicosAPI.atualizar(tecnicoEditando.id, dadosParaEnviar);
       if (response.success) {
         fecharModalEditar();
-        alert('Técnico actualizado com sucesso!');
+        toast.success('Técnico actualizado com sucesso!');
         carregarDados();
       } else {
-        alert(response.error || 'Erro ao actualizar técnico');
+        toast.error(response.error || 'Erro ao actualizar técnico');
       }
     } catch (error: any) {
-      alert(error.message || 'Erro ao actualizar técnico');
+      toast.error(error.message || 'Erro ao actualizar técnico');
     }
   };
 
@@ -125,36 +126,40 @@ export default function AdminTecnicos() {
   const handleVincular = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userIdParaVincular.trim()) {
-      alert('Por favor, insira um userId válido');
+      toast.error('Por favor, insira um userId válido');
       return;
     }
     try {
       const response = await tecnicosAPI.vincularUsuario(tecnicoSelecionado.id, userIdParaVincular);
       if (response.success) {
-        alert('Técnico vinculado com sucesso! O técnico precisa fazer logout e login novamente.');
+        toast.success('Técnico vinculado com sucesso! O técnico precisa fazer logout e login novamente.');
         fecharModalVincular();
         carregarDados();
       }
     } catch (error: any) {
-      alert(error.message || 'Erro ao vincular técnico');
+      toast.error(error.message || 'Erro ao vincular técnico');
     }
   };
 
-  const handleDeletar = async (id: string, nome: string) => {
-    if (!confirm(`Tem certeza que deseja eliminar o técnico "${nome}"?`)) return;
-
-    try {
-      const response = await tecnicosAPI.deletar(id);
-      if (response.success) {
-        setTecnicos(tecnicos.filter(t => t.id !== id));
-        alert('Técnico eliminado com sucesso!');
-      } else {
-        // Mostrar mensagem de erro com regra de negócio
-        alert(response.error || 'Erro ao eliminar técnico');
-      }
-    } catch (error: any) {
-      alert(error.message || 'Erro ao eliminar técnico');
-    }
+  const handleDeletar = (id: string, nome: string) => {
+    toast(`Tem certeza que deseja eliminar o técnico "${nome}"?`, {
+      action: {
+        label: 'Eliminar',
+        onClick: async () => {
+          try {
+            const response = await tecnicosAPI.deletar(id);
+            if (response.success) {
+              setTecnicos(tecnicos.filter(t => t.id !== id));
+              toast.success('Técnico eliminado com sucesso!');
+            } else {
+              toast.error(response.error || 'Erro ao eliminar técnico');
+            }
+          } catch (error: any) {
+            toast.error(error.message || 'Erro ao eliminar técnico');
+          }
+        },
+      },
+    });
   };
 
   if (loading) {

@@ -1,6 +1,7 @@
 import { FileText, Plus, AlertCircle, TrendingUp, Clock, Loader, X, Calendar, DollarSign, Edit, Trash2, Search } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { contratosAPI, clientesAPI } from "../../services/api";
+import { toast } from "sonner";
 
 export default function AdminContratos() {
   const [contratos, setContratos] = useState<any[]>([]);
@@ -79,30 +80,34 @@ export default function AdminContratos() {
       if (response.success) {
         await carregarDados();
         fecharModal();
-        alert(contratoEditando ? 'Contrato actualizado com sucesso!' : 'Contrato criado com sucesso!');
+        toast.success(contratoEditando ? 'Contrato actualizado com sucesso!' : 'Contrato criado com sucesso!');
       } else {
-        alert(response.error || 'Erro ao guardar contrato');
+        toast.error(response.error || 'Erro ao guardar contrato');
       }
     } catch (error: any) {
-      alert(error.message || 'Erro ao guardar contrato');
+      toast.error(error.message || 'Erro ao guardar contrato');
     }
   };
 
-  const handleEliminar = async (contrato: any) => {
-    if (!confirm(`Tem certeza que deseja eliminar o contrato de "${contrato.empresaNome || contrato.clienteNome || 'este cliente'}"?`)) return;
-
-    try {
-      const response = await contratosAPI.deletar(contrato.id.toString());
-      if (response.success) {
-        setContratos(prev => prev.filter(c => c.id !== contrato.id));
-        alert('Contrato eliminado com sucesso!');
-      } else {
-        // Mostrar mensagem de regra de negócio
-        alert(response.error || 'Erro ao eliminar contrato');
-      }
-    } catch (error: any) {
-      alert(error.message || 'Erro ao eliminar contrato');
-    }
+  const handleEliminar = (contrato: any) => {
+    toast(`Tem certeza que deseja eliminar o contrato de "${contrato.empresaNome || contrato.clienteNome || 'este cliente'}"?`, {
+      action: {
+        label: 'Eliminar',
+        onClick: async () => {
+          try {
+            const response = await contratosAPI.deletar(contrato.id.toString());
+            if (response.success) {
+              setContratos(prev => prev.filter(c => c.id !== contrato.id));
+              toast.success('Contrato eliminado com sucesso!');
+            } else {
+              toast.error(response.error || 'Erro ao eliminar contrato');
+            }
+          } catch (error: any) {
+            toast.error(error.message || 'Erro ao eliminar contrato');
+          }
+        },
+      },
+    });
   };
 
   if (loading) {

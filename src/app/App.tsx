@@ -3,6 +3,8 @@ import { router } from "./routes";
 import AuthInitializer from "./components/AuthInitializer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useEffect } from "react";
+import { Toaster } from "./components/ui/sonner";
+
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
 
@@ -59,6 +61,7 @@ export default function App() {
     <ErrorBoundary>
       <RouterProvider router={router} />
       <AuthInitializer />
+      <Toaster position="top-right" richColors />
     </ErrorBoundary>
   );
 }

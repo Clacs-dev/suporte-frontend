@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Eye, EyeOff, Save, ArrowLeft } from "lucide-react";
 import { authAPI } from "../../services/api";
+import { toast } from "sonner";
 
 export default function AdminPerfil() {
     const navigate = useNavigate();
@@ -16,11 +17,11 @@ export default function AdminPerfil() {
         e.preventDefault();
 
         if (novaSenha && novaSenha !== confirmarSenha) {
-            alert('As senhas não coincidem.');
+            toast.error('As senhas não coincidem.');
             return;
         }
         if (novaSenha && novaSenha.length < 5) {
-            alert('A nova senha deve ter pelo menos 5 caracteres.');
+            toast.error('A nova senha deve ter pelo menos 5 caracteres.');
             return;
         }
 
@@ -33,14 +34,14 @@ export default function AdminPerfil() {
             if (response.success) {
                 localStorage.setItem('userName', response.data.nome);
                 localStorage.setItem('userEmail', response.data.email);
-                alert('Credenciais atualizadas com sucesso!');
+                toast.success('Credenciais atualizadas com sucesso!');
                 setNovaSenha('');
                 setConfirmarSenha('');
             } else {
-                alert(response.error || 'Erro ao atualizar credenciais');
+                toast.error(response.error || 'Erro ao atualizar credenciais');
             }
         } catch (error: any) {
-            alert(error.message || 'Erro ao atualizar credenciais');
+            toast.error(error.message || 'Erro ao atualizar credenciais');
         } finally {
             setSalvando(false);
         }

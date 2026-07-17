@@ -2,27 +2,32 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { LogIn, User, Lock, Loader, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '../services/api';
+import { toast } from "sonner";
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
-  const [erro, setErro] = useState('');
   const [showReset, setShowReset] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const handleReset = () => {
-    if (confirm('Deseja limpar todos os dados do localStorage? Isto irá requerer uma nova inicialização do sistema.')) {
-      localStorage.clear();
-      window.location.reload();
-    }
+    toast('Deseja limpar todos os dados do localStorage? Isto irá requerer uma nova inicialização do sistema.', {
+      action: {
+        label: 'Limpar',
+        onClick: () => {
+          localStorage.clear();
+          window.location.reload();
+        },
+      },
+    });
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setErro('');
+
 
     try {
       console.log('=== INICIANDO LOGIN ===');
@@ -35,6 +40,7 @@ export default function Login() {
         const { session, profile, tecnicoId, clienteId } = response.data;
 
         console.log('Login bem-sucedido!');
+        toast.success('Login efetuado com sucesso!');
         console.log('Profile:', profile);
         console.log('TecnicoId recebido:', tecnicoId);
         console.log('ClienteId recebido:', clienteId);
@@ -85,11 +91,14 @@ export default function Login() {
           } else {
             navigate('/cliente/dashboard');
           }
-        }, 300);
+        }, 1000);
+      } else {
+        toast.error(response.error || 'Email ou senha inválidos');
+
       }
     } catch (error: any) {
       console.error('❌ Erro ao fazer login:', error);
-      setErro(error.message || 'Erro ao fazer login. Verifique suas credenciais.');
+      toast.error(error.message || 'Email ou senha inválidos');
     } finally {
       setLoading(false);
     }
@@ -108,11 +117,7 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
-            {erro && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
-                {erro}
-              </div>
-            )}
+
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -2,6 +2,7 @@ import { Search, Filter, Loader, CheckCircle, FileText, Edit, X, MoreVertical } 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { intervencoesAPI } from "../../services/api";
+import { toast } from "sonner";
 import { maskId } from "../../services/MaskId";
 
 const API_BASE_URL = window.location.hostname === "localhost"
@@ -77,12 +78,12 @@ export default function TecnicoIntervencoes() {
         setMostrarEdicao(false);
         setIntervencaoEditando(null);
         carregarIntervencoes();
-        alert('Intervenção actualizada com sucesso!');
+        toast.success('Intervenção actualizada com sucesso!');
       } else {
-        alert(response.error || 'Erro ao actualizar intervenção');
+        toast.error(response.error || 'Erro ao actualizar intervenção');
       }
     } catch (error) {
-      alert('Erro ao actualizar intervenção');
+      toast.error('Erro ao actualizar intervenção');
     }
   };
 

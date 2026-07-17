@@ -1,6 +1,7 @@
 import { Search, Plus, Edit, Trash2, CheckCircle, XCircle, Loader, X, Eye, EyeOff } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { clientesAPI } from "../../services/api";
+import { toast } from "sonner";
 
 export default function AdminClientes() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,41 +59,45 @@ export default function AdminClientes() {
         if (response.success) {
           const res = await clientesAPI.listar();
           if (res.success) setClientes(res.data);
-          alert('Cliente actualizado com sucesso!');
+          toast.success('Cliente actualizado com sucesso!');
           fecharModal();
         } else {
-          alert(response.error || 'Erro ao actualizar cliente');
+          toast.error(response.error || 'Erro ao actualizar cliente');
         }
       } else {
         const response = await clientesAPI.criar(formData);
         if (response.success) {
           setClientes([...clientes, response.data]);
-          alert('Cliente criado com sucesso!');
+          toast.success('Cliente criado com sucesso!');
           fecharModal();
         } else {
-          alert(response.error || 'Erro ao criar cliente');
+          toast.error(response.error || 'Erro ao criar cliente');
         }
       }
     } catch (error: any) {
-      alert(error.message || 'Erro ao salvar cliente');
+      toast.error(error.message || 'Erro ao salvar cliente');
     }
   };
 
-  const handleEliminar = async (cliente: any) => {
-    if (!confirm(`Tem certeza que deseja eliminar o cliente "${cliente.nome}"?`)) return;
-
-    try {
-      const response = await clientesAPI.deletar(cliente.id);
-      if (response.success) {
-        setClientes(clientes.filter(c => c.id !== cliente.id));
-        alert('Cliente eliminado com sucesso!');
-      } else {
-        // Mostrar mensagem de erro com a regra de negócio
-        alert(response.error || 'Erro ao eliminar cliente');
-      }
-    } catch (error: any) {
-      alert(error.message || 'Erro ao eliminar cliente');
-    }
+  const handleEliminar = (cliente: any) => {
+    toast(`Tem certeza que deseja eliminar o cliente "${cliente.nome}"?`, {
+      action: {
+        label: 'Eliminar',
+        onClick: async () => {
+          try {
+            const response = await clientesAPI.deletar(cliente.id);
+            if (response.success) {
+              setClientes(clientes.filter(c => c.id !== cliente.id));
+              toast.success('Cliente eliminado com sucesso!');
+            } else {
+              toast.error(response.error || 'Erro ao eliminar cliente');
+            }
+          } catch (error: any) {
+            toast.error(error.message || 'Erro ao eliminar cliente');
+          }
+        },
+      },
+    });
   };
 
   const handleToggleStatus = async (cliente: any) => {
@@ -102,10 +107,10 @@ export default function AdminClientes() {
       if (response.success) {
         setClientes(clientes.map(c => c.id === cliente.id ? { ...c, status: novoStatus } : c));
       } else {
-        alert(response.error || 'Erro ao actualizar status');
+        toast.error(response.error || 'Erro ao actualizar status');
       }
     } catch (error) {
-      alert('Erro ao actualizar status do cliente');
+      toast.error('Erro ao actualizar status do cliente');
     }
   };
 

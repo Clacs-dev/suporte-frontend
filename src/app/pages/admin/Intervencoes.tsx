@@ -1,6 +1,7 @@
 import { Search, Plus, Filter, Upload, File, X, Loader, Edit, CheckCircle, FileText, Trash2, MoreVertical, ChevronDown } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { intervencoesAPI, clientesAPI, tecnicosAPI } from "../../services/api";
+import { toast } from "sonner";
 const API_BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8001"
   : "https://clacs-backend.onrender.com";
@@ -69,12 +70,12 @@ export default function AdminIntervencoes() {
         setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "" });
         setArquivosAnexados([]);
         carregarDados();
-        alert('Intervenção criada com sucesso!');
+        toast.success('Intervenção criada com sucesso!');
       } else {
-        alert('Erro ao criar intervenção: ' + (response.error || 'Erro desconhecido'));
+        toast.error('Erro ao criar intervenção: ' + (response.error || 'Erro desconhecido'));
       }
     } catch (error) {
-      alert('Erro ao criar intervenção');
+      toast.error('Erro ao criar intervenção');
     }
   };
 
@@ -108,12 +109,12 @@ export default function AdminIntervencoes() {
         setMostrarEdicaoCompleta(false);
         setIntervencaoEditando(null);
         carregarDados();
-        alert('Intervenção actualizada com sucesso!');
+        toast.success('Intervenção actualizada com sucesso!');
       } else {
-        alert('Erro ao actualizar: ' + (response.error || 'Erro desconhecido'));
+        toast.error('Erro ao actualizar: ' + (response.error || 'Erro desconhecido'));
       }
     } catch (error) {
-      alert('Erro ao actualizar intervenção');
+      toast.error('Erro ao actualizar intervenção');
     }
   };
 
@@ -131,44 +132,56 @@ export default function AdminIntervencoes() {
         setMostrarEdicao(false);
         setIntervencaoEditando(null);
         setTecnicoSelecionado("");
-        alert('Técnico atribuído com sucesso!');
+        toast.success('Técnico atribuído com sucesso!');
         await carregarDados();
       } else {
-        alert('Erro ao atribuir técnico: ' + (response.error || 'Erro desconhecido'));
+        toast.error('Erro ao atribuir técnico: ' + (response.error || 'Erro desconhecido'));
       }
     } catch (error) {
-      alert('Erro ao atribuir técnico');
+      toast.error('Erro ao atribuir técnico');
     }
   };
 
-  const handleConcluirIntervencao = async (intervencaoId: string) => {
-    if (!confirm('Tem certeza que deseja concluir esta intervenção?')) return;
-    try {
-      await intervencoesAPI.atualizarStatus(intervencaoId, "Concluído");
-      alert('Intervenção concluída com sucesso!');
-      carregarDados();
-    } catch (error) {
-      alert('Erro ao concluir intervenção');
-    }
+  const handleConcluirIntervencao = (intervencaoId: string) => {
+    toast('Tem certeza que deseja concluir esta intervenção?', {
+      action: {
+        label: 'Concluir',
+        onClick: async () => {
+          try {
+            await intervencoesAPI.atualizarStatus(intervencaoId, "Concluído");
+            toast.success('Intervenção concluída com sucesso!');
+            carregarDados();
+          } catch (error) {
+            toast.error('Erro ao concluir intervenção');
+          }
+        },
+      },
+    });
   };
 
-  const handleEliminarIntervencao = async (intervencaoId: string) => {
-    if (!confirm('Tem certeza que deseja eliminar esta intervenção?')) return;
-    try {
-      const response = await intervencoesAPI.deletar(intervencaoId);
-      if (response.success) {
-        alert('Intervenção eliminada com sucesso!');
-        carregarDados();
-      } else {
-        alert(response.error || 'Erro ao eliminar intervenção');
-      }
-    } catch (error) {
-      alert('Erro ao eliminar intervenção');
-    }
+  const handleEliminarIntervencao = (intervencaoId: string) => {
+    toast('Tem certeza que deseja eliminar esta intervenção?', {
+      action: {
+        label: 'Eliminar',
+        onClick: async () => {
+          try {
+            const response = await intervencoesAPI.deletar(intervencaoId);
+            if (response.success) {
+              toast.success('Intervenção eliminada com sucesso!');
+              carregarDados();
+            } else {
+              toast.error(response.error || 'Erro ao eliminar intervenção');
+            }
+          } catch (error) {
+            toast.error('Erro ao eliminar intervenção');
+          }
+        },
+      },
+    });
   };
 
   const handleDownloadPDF = (intervencaoId: string) => {
-    if (!intervencaoId) { alert('Erro: ID da intervenção não encontrado.'); return; }
+    if (!intervencaoId) { toast.error('Erro: ID da intervenção não encontrado.'); return; }
     setPdfUrl(`${API_BASE_URL}/relatorios/intervencao/${intervencaoId}/visualizar`);
     setMostrarPDF(true);
   };

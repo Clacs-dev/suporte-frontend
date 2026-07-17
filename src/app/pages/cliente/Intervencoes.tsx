@@ -1,6 +1,7 @@
 import { Plus, Search, Star, MessageCircle, Upload, File, Image, X, Loader, CheckCircle, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { intervencoesAPI, clientesAPI, contratosAPI } from "../../services/api";
+import { toast } from "sonner";
 const API_BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8001"
   : "https://clacs-backend.onrender.com";
@@ -29,14 +30,21 @@ export default function ClienteIntervencoes() {
   }, []);
 
 
-  const handleEliminar = async (id: string) => {
-    if (!confirm('Tem a certeza que quer eliminar esta intervenção?')) return
-    try {
-      await intervencoesAPI.deletar(id)
-      setIntervencoes(prev => prev.filter((i: any) => i.id !== id))
-    } catch {
-      alert('Erro ao eliminar intervenção.')
-    }
+  const handleEliminar = (id: string) => {
+    toast('Tem a certeza que quer eliminar esta intervenção?', {
+      action: {
+        label: 'Eliminar',
+        onClick: async () => {
+          try {
+            await intervencoesAPI.deletar(id)
+            setIntervencoes(prev => prev.filter((i: any) => i.id !== id))
+            toast.success('Intervenção eliminada com sucesso!')
+          } catch {
+            toast.error('Erro ao eliminar intervenção.')
+          }
+        },
+      },
+    })
   }
 
   useEffect(() => {
@@ -99,7 +107,7 @@ export default function ClienteIntervencoes() {
     e.preventDefault();
 
     if (!temContratoAtivo) {
-      alert('Não é possível criar intervenções sem um contrato ativo.');
+      toast.error('Não é possível criar intervenções sem um contrato ativo.');
       return;
     }
 
@@ -123,34 +131,37 @@ export default function ClienteIntervencoes() {
           anexos: []
         });
         carregarDados();
-        alert('Intervenção criada com sucesso!');
+        toast.success('Intervenção criada com sucesso!');
       } else {
-        alert('Erro ao criar intervenção: ' + (response.error || 'Erro desconhecido'));
+        toast.error('Erro ao criar intervenção: ' + (response.error || 'Erro desconhecido'));
       }
     } catch (error) {
       console.error('❌ Erro ao criar intervenção:', error);
-      alert('Erro ao criar intervenção');
+      toast.error('Erro ao criar intervenção');
     }
   };
 
-  const handleFecharIntervencao = async (intervencaoId: string) => {
-    if (!confirm('Tem certeza que deseja fechar esta intervenção? Confirme que o problema foi resolvido.')) {
-      return;
-    }
-
-    try {
-      await intervencoesAPI.atualizarStatus(intervencaoId, "Fechado");
-      alert('Intervenção fechada com sucesso!');
-      carregarDados();
-    } catch (error) {
-      console.error('Erro ao fechar intervenção:', error);
-      alert('Erro ao fechar intervenção');
-    }
+  const handleFecharIntervencao = (intervencaoId: string) => {
+    toast('Tem certeza que deseja fechar esta intervenção? Confirme que o problema foi resolvido.', {
+      action: {
+        label: 'Fechar',
+        onClick: async () => {
+          try {
+            await intervencoesAPI.atualizarStatus(intervencaoId, "Fechado");
+            toast.success('Intervenção fechada com sucesso!');
+            carregarDados();
+          } catch (error) {
+            console.error('Erro ao fechar intervenção:', error);
+            toast.error('Erro ao fechar intervenção');
+          }
+        },
+      },
+    });
   };
 
   const handleVisualizarPDF = (intervencaoId: string) => {
     if (!intervencaoId) {
-      alert('Erro: ID da intervenção não encontrado.');
+      toast.error('Erro: ID da intervenção não encontrado.');
       return;
     }
 
@@ -164,7 +175,7 @@ export default function ClienteIntervencoes() {
   // ✅ Passa o nome do cliente e a data para o backend assinar o PDF
   const handleDownloadPDF = (intervencaoId: string) => {
     if (!intervencaoId) {
-      alert('Erro: ID da intervenção não encontrado.');
+      toast.error('Erro: ID da intervenção não encontrado.');
       return;
     }
 
