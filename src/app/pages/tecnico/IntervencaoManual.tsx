@@ -10,6 +10,7 @@ const STATUS_FECHADOS = ["Resolvido", "Fechado", "Concluído"];
 
 export default function TecnicoIntervencaoManual() {
     const [intervencoes, setIntervencoes] = useState<Intervencao[]>([]);
+    const [todasIntervencoes, setTodasIntervencoes] = useState<Intervencao[]>([]);
     const [registros, setRegistros] = useState<RegistroHoras[]>([]);
     const [loading, setLoading] = useState(true);
     const [msg, setMsg] = useState<{ tipo: "sucesso" | "erro"; texto: string } | null>(null);
@@ -28,7 +29,10 @@ export default function TecnicoIntervencaoManual() {
             intervencoesAPI.listarPorTecnico(tId),
             registrosHorasAPI.listarPorTecnico(tId),
         ]);
-        if (ir.success) setIntervencoes(ir.data.filter((i: any) => !STATUS_FECHADOS.includes(i.status)));
+        if (ir.success) {
+            setTodasIntervencoes(ir.data);
+            setIntervencoes(ir.data.filter((i: any) => !STATUS_FECHADOS.includes(i.status)));
+        }
         if (rr.success) setRegistros(rr.data);
         setLoading(false);
     }, []);
@@ -247,7 +251,7 @@ export default function TecnicoIntervencaoManual() {
                                             {new Date(r.data).toLocaleDateString("pt-PT")}
                                         </td>
                                         <td className="px-4 py-3 font-medium text-gray-900">
-                                            {intervencoes.find(i => i.id === r.intervencaoId)?.numero || "-"}
+                                            {todasIntervencoes.find(i => i.id === (r.intervencaoId || (r as any).intervencao_id))?.titulo || "-"}
                                         </td>
                                         <td className="px-4 py-3 text-gray-600">
                                             {(r.horaInicio || r.hora_inicio) && (r.horaFim || r.hora_fim)

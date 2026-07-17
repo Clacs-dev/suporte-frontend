@@ -1,4 +1,4 @@
-import { Search, Filter, Loader, CheckCircle, FileText, Edit, X } from "lucide-react";
+import { Search, Filter, Loader, CheckCircle, FileText, Edit, X, MoreVertical } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { intervencoesAPI } from "../../services/api";
@@ -17,6 +17,7 @@ export default function TecnicoIntervencoes() {
   const [erro, setErro] = useState("");
   const [mostrarEdicao, setMostrarEdicao] = useState(false);
   const [intervencaoEditando, setIntervencaoEditando] = useState<any>(null);
+  const [menuPos, setMenuPos] = useState<{ id: string; top: number; left: number } | null>(null);
   const [formEditar, setFormEditar] = useState({
     titulo: "", descricao: "", categoria: "Geral", prioridade: "Média"
   });
@@ -162,23 +163,28 @@ export default function TecnicoIntervencoes() {
           <h3 className="font-semibold text-gray-900">Filtros</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input type="text" placeholder="Buscar intervenções..." value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input type="text" placeholder="Buscar intervenções..." value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+            </div>
           </div>
-          <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-            <option>Todos</option>
-            <option>Aberto</option>
-            <option>Em Andamento</option>
-            <option>Aguardando Cliente</option>
-            <option>Concluído</option>
-          </select>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Status</label>
+            <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option>Todos</option>
+              <option>Aberto</option>
+              <option>Em Andamento</option>
+              <option>Aguardando Cliente</option>
+              <option>Concluído</option>
+            </select>
+          </div>
         </div>
       </div>
-
       <div className="space-y-4">
         {intervencoesFiltradas.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
@@ -217,47 +223,69 @@ export default function TecnicoIntervencoes() {
                     <p className="text-2xl font-bold text-green-700">{Number(intervencao.horasGastas || intervencao.horas_gastas || 0).toFixed(2)}h</p>
                   </div>
 
-                  <button onClick={() => handleVisualizarPDF(intervencao.id)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                    <FileText className="w-4 h-4" /> Visualizar PDF
+                  <button
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      if (menuPos?.id === intervencao.id) {
+                        setMenuPos(null);
+                        return;
+                      }
+                      const menuAltura = 260; // estimativa da altura do menu
+                      const espacoAbaixo = window.innerHeight - rect.bottom;
+                      const top = espacoAbaixo < menuAltura ? rect.top - menuAltura : rect.top;
+                      setMenuPos({ id: intervencao.id, top, left: rect.left - 256 - 8 });
+                    }}
+                    className="w-full flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
+                    <MoreVertical className="w-4 h-4" /> Acções
                   </button>
-
-                  <button onClick={() => handleBaixarPDF(intervencao.id)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                    <FileText className="w-4 h-4" /> Baixar PDF
-                  </button>
-
-                  {/* Botão Editar — sempre visível */}
-                  <button onClick={() => abrirEdicao(intervencao)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-colors">
-                    <Edit className="w-4 h-4" /> Editar
-                  </button>
-
-                  {/* Botão Resolver */}
-                  {!["Resolvido", "Fechado", "Concluído"].includes(intervencao.status) && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => navigate(`/tecnico/horas?intervencaoId=${intervencao.id}`)}
-                        className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Resolver Automaticamente
-                      </button>
-                      <button
-                        onClick={() => navigate(`/tecnico/intervencoes-manual?intervencaoId=${intervencao.id}`)}
-                        className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                      >
-                        <CheckCircle className="w-4 h-4" />
-                        Resolver Manualmente
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
           ))
         )}
       </div>
+
+      {menuPos && (() => {
+        const intervencao = intervencoesFiltradas.find(i => i.id === menuPos.id);
+        if (!intervencao) return null;
+        return (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setMenuPos(null)} />
+            <div
+              className="fixed w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden"
+              style={{ top: menuPos.top, left: menuPos.left }}
+            >
+              <button onClick={() => { handleVisualizarPDF(intervencao.id); setMenuPos(null); }}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <FileText className="w-4 h-4" /> Visualizar PDF
+              </button>
+
+              <button onClick={() => { handleBaixarPDF(intervencao.id); setMenuPos(null); }}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <FileText className="w-4 h-4" /> Baixar e Assinar
+              </button>
+
+              <button onClick={() => { abrirEdicao(intervencao); setMenuPos(null); }}
+                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-blue-700 hover:bg-blue-50 transition-colors">
+                <Edit className="w-4 h-4" /> Editar
+              </button>
+
+              {!["Resolvido", "Fechado", "Concluído"].includes(intervencao.status) && (
+                <>
+                  <button onClick={() => { navigate(`/tecnico/horas?intervencaoId=${intervencao.id}`); setMenuPos(null); }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-green-700 hover:bg-green-50 transition-colors border-t border-gray-100">
+                    <CheckCircle className="w-4 h-4" /> Resolver Automaticamente
+                  </button>
+                  <button onClick={() => { navigate(`/tecnico/intervencoes-manual?intervencaoId=${intervencao.id}`); setMenuPos(null); }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-blue-700 hover:bg-blue-50 transition-colors">
+                    <CheckCircle className="w-4 h-4" /> Resolver Manualmente
+                  </button>
+                </>
+              )}
+            </div>
+          </>
+        );
+      })()}
 
       {/* Modal Editar */}
       {mostrarEdicao && intervencaoEditando && (

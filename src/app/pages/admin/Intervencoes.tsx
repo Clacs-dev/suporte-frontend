@@ -1,4 +1,4 @@
-import { Search, Plus, Filter, Upload, File, X, Loader, Edit, CheckCircle, FileText, Trash2, MoreVertical } from "lucide-react";
+import { Search, Plus, Filter, Upload, File, X, Loader, Edit, CheckCircle, FileText, Trash2, MoreVertical, ChevronDown } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { intervencoesAPI, clientesAPI, tecnicosAPI } from "../../services/api";
 const API_BASE_URL = window.location.hostname === "localhost"
@@ -18,6 +18,7 @@ export default function AdminIntervencoes() {
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
   const [tecnicos, setTecnicos] = useState<any[]>([]);
+  const [dropdownClienteAberto, setDropdownClienteAberto] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mostrarPDF, setMostrarPDF] = useState(false);
   const [menuAbertoId, setMenuAbertoId] = useState<string | null>(null);
@@ -232,15 +233,36 @@ export default function AdminIntervencoes() {
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Nova Intervenção</h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
-                <select required value={formData.clienteId} onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="">Selecione o cliente...</option>
-                  {clientes.filter(c => c.status === "Ativo").map(c => (
-                    <option key={c.id} value={c.id}>{c.empresa || c.nome}</option>
-                  ))}
-                </select>
+                <button type="button" onClick={() => setDropdownClienteAberto(!dropdownClienteAberto)}
+                  className="w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-left text-gray-900">
+                  <span>
+                    {formData.clienteId
+                      ? (() => { const c = clientes.find(c => c.id === formData.clienteId); return c ? (c.empresa || c.nome) : "Selecione o cliente..."; })()
+                      : "Selecione o cliente..."}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </button>
+
+                {/* Input escondido para manter a validação HTML "required" */}
+                <input type="text" required value={formData.clienteId} readOnly tabIndex={-1}
+                  className="absolute opacity-0 pointer-events-none h-0 w-0" />
+
+                {dropdownClienteAberto && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setDropdownClienteAberto(false)} />
+                    <div className="absolute left-0 top-full mt-1 w-full max-h-64 overflow-y-auto bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                      {clientes.filter(c => c.status === "Ativo").map(c => (
+                        <button key={c.id} type="button"
+                          onClick={() => { setFormData({ ...formData, clienteId: c.id }); setDropdownClienteAberto(false); }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
+                          {c.empresa || c.nome}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Técnico</label>
@@ -346,19 +368,28 @@ export default function AdminIntervencoes() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
         <div className="flex items-center gap-2 mb-4"><Filter className="w-5 h-5 text-gray-600" /><h3 className="font-semibold text-gray-900">Filtros</h3></div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input type="text" placeholder="Buscar intervenções..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input type="text" placeholder="Buscar intervenções..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
           </div>
-          <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option>Todos</option><option>Aberto</option><option>Em Andamento</option><option>Resolvido</option><option>Fechado</option><option>Concluído</option>
-          </select>
-          <select value={filtroPrioridade} onChange={(e) => setFiltroPrioridade(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option>Todos</option><option>Baixa</option><option>Média</option><option>Alta</option>
-          </select>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Status</label>
+            <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>Todos</option><option>Aberto</option><option>Em Andamento</option><option>Resolvido</option><option>Fechado</option><option>Concluído</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Prioridade</label>
+            <select value={filtroPrioridade} onChange={(e) => setFiltroPrioridade(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>Todos</option><option>Baixa</option><option>Média</option><option>Alta</option>
+            </select>
+          </div>
         </div>
       </div>
 
