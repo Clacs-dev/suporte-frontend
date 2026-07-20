@@ -339,6 +339,14 @@ export default function ClienteIntervencoes() {
                     <p className="text-2xl font-bold text-purple-700">{(intervencao.horasGastas || 0).toFixed(2)}h</p>
                   </div>
 
+                  <button
+                    onClick={() => handleVisualizarPDF(intervencao.id)}
+                    className="w-full lg:w-auto px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Visualizar PDF
+                  </button>
+
                   {intervencao.status === "Resolvido" && (
                     <button
                       onClick={() => handleFecharIntervencao(intervencao.id)}
@@ -346,14 +354,6 @@ export default function ClienteIntervencoes() {
                     >
                       <CheckCircle className="w-4 h-4" />
                       Fechar a Intervenção
-                    </button>
-                  )}
-                  {intervencao.status === "Aberto" && (
-                    <button
-                      onClick={() => handleEliminar(intervencao.id)}
-                      className="w-full lg:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                      Eliminar Intervenção
                     </button>
                   )}
 
@@ -367,13 +367,14 @@ export default function ClienteIntervencoes() {
                     </button>
                   )}
 
-                  <button
-                    onClick={() => handleVisualizarPDF(intervencao.id)}
-                    className="w-full lg:w-auto px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Visualizar PDF
-                  </button>
+                  {intervencao.status === "Aberto" && (
+                    <button
+                      onClick={() => handleEliminar(intervencao.id)}
+                      className="w-full lg:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      Eliminar Intervenção
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

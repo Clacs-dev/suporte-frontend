@@ -1,7 +1,8 @@
 import { Outlet, useNavigate, useLocation } from "react-router";
-import { 
-  LayoutDashboard, 
-  ClipboardList, 
+import NotificacaoSino from "../components/NotificacaoSino";
+import {
+  LayoutDashboard,
+  ClipboardList,
   FileText,
   Bell,
   LogOut,
@@ -15,7 +16,7 @@ export default function ClienteLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [clienteInfo, setClienteInfo] = useState<{nome: string; email: string} | null>(null);
+  const [clienteInfo, setClienteInfo] = useState<{ nome: string; email: string } | null>(null);
   const usuarioId = localStorage.getItem('userId');
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function ClienteLayout() {
   const carregarDadosCliente = async () => {
     try {
       if (!usuarioId) return;
-      
+
       const response = await clientesAPI.buscarPorUsuarioId(usuarioId);
       if (response.success && response.data) {
         setClienteInfo({
@@ -61,7 +62,7 @@ export default function ClienteLayout() {
             <X className="w-6 h-6" />
           </button>
         </div>
-        
+
         <nav className="p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -72,11 +73,10 @@ export default function ClienteLayout() {
                   navigate(item.path);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive(item.path)
-                    ? "bg-purple-700 text-white"
-                    : "text-purple-100 hover:bg-purple-800"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive(item.path)
+                  ? "bg-purple-700 text-white"
+                  : "text-purple-100 hover:bg-purple-800"
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span>{item.label}</span>
@@ -94,14 +94,12 @@ export default function ClienteLayout() {
             <button onClick={() => setSidebarOpen(true)} className="md:hidden">
               <Menu className="w-6 h-6 text-gray-600" />
             </button>
-            
+
             <div className="flex-1 md:flex-none"></div>
-            
+
             <div className="flex items-center gap-4">
-              <button className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <Bell className="w-5 h-5 text-gray-600" />
-              </button>
-              
+              <NotificacaoSino />
+
               <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-semibold text-gray-800">
@@ -112,13 +110,13 @@ export default function ClienteLayout() {
                   </p>
                 </div>
                 <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                  {clienteInfo?.nome 
+                  {clienteInfo?.nome
                     ? clienteInfo.nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
                     : 'CL'
                   }
                 </div>
               </div>
-              
+
               <button
                 onClick={() => navigate("/")}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"

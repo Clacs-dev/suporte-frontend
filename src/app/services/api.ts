@@ -420,6 +420,22 @@ export const statsAPI = {
 };
 
 // ====================================
+// NOTIFICAÇÕES
+// ====================================
+
+export const notificacoesAPI = {
+  listar: async () => {
+    return fetchAPI('/notificacoes');
+  },
+  marcarLida: async (id: string) => {
+    return fetchAPI(`/notificacoes/${id}/marcar-lida`, { method: 'POST' });
+  },
+  marcarTodasLidas: async () => {
+    return fetchAPI('/notificacoes/marcar-todas-lidas', { method: 'POST' });
+  },
+};
+
+// ====================================
 // INICIALIZAÇÃO (APENAS DESENVOLVIMENTO)
 // ====================================
 

@@ -1,5 +1,6 @@
 import { Outlet, useNavigate, useLocation } from "react-router";
 import PerfilDropdown from "../components/PerfilDropdown";
+import NotificacaoSino from "../components/NotificacaoSino";
 import {
   LayoutDashboard,
   Users,
@@ -84,10 +85,7 @@ export default function AdminLayout() {
             <div className="flex-1 md:flex-none"></div>
 
             <div className="flex items-center gap-4">
-              <button className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+              <NotificacaoSino />
 
               <div className="relative">
                 <button onClick={() => setMostrarPerfil(!mostrarPerfil)} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
