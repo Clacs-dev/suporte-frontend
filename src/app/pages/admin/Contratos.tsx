@@ -357,7 +357,7 @@ export default function AdminContratos() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="">Selecione um cliente</option>
                   {clientes.filter(c => c.status === "Ativo").map(c => (
-                    <option key={c.id} value={c.id}>{c.nome}</option>
+                    <option key={c.id} value={c.id}>{c.empresa || c.nome}</option>
                   ))}
                 </select>
               </div>
