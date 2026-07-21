@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { contratosAPI, intervencoesAPI, clientesAPI } from "../../services/api";
 const API_BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8001"
-  : "https://clacs-backend.onrender.com";
+  : "https://suporte-backend-l9hm.onrender.com";
 
 
 export default function ClienteContratos() {

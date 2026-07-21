@@ -1,7 +1,7 @@
 const API_BASE_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:8001"
-    : "https://clacs-backend.onrender.com";
+    : "https://suporte-backend-l9hm.onrender.com";
 // Obter token de autenticação do localStorage
 function getAuthToken() {
   return localStorage.getItem('access_token');

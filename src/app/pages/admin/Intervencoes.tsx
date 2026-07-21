@@ -4,7 +4,7 @@ import { intervencoesAPI, clientesAPI, tecnicosAPI } from "../../services/api";
 import { toast } from "sonner";
 const API_BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8001"
-  : "https://clacs-backend.onrender.com";
+  : "https://suporte-backend-l9hm.onrender.com";
 
 export default function AdminIntervencoes() {
   const [filtroStatus, setFiltroStatus] = useState("Todos");
