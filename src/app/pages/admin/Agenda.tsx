@@ -16,7 +16,7 @@ interface Intervencao {
   status: string
 }
 
-const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+const MONTHS = ['Janeiro', 'Fevereiro', 'MarÃ§o', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
 const DAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
@@ -33,7 +33,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelada: 'bg-red-100 text-red-700 border-red-200',
   Aberto: 'bg-yellow-100 text-yellow-700 border-yellow-200',
   'Em Andamento': 'bg-blue-100 text-blue-700 border-blue-200',
-  Concluído: 'bg-green-100 text-green-700 border-green-200',
+  ConcluÃ­do: 'bg-green-100 text-green-700 border-green-200',
 }
 
 export default function AdminAgenda() {
@@ -141,7 +141,7 @@ export default function AdminAgenda() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Agenda {currentYear}</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Visão anual das intervenções por técnico</p>
+          <p className="text-gray-500 text-sm mt-0.5">VisÃ£o anual das intervenÃ§Ãµes por tÃ©cnico</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setCurrentYear(y => y - 1)}
@@ -164,10 +164,10 @@ export default function AdminAgenda() {
           </div>
           <div>
             <p className="text-sm font-semibold text-blue-900">
-              {todayIntervencoes.length} intervenção(ões) agendada(s) para hoje!
+              {todayIntervencoes.length} intervenÃ§Ã£o(Ãµes) agendada(s) para hoje!
             </p>
             <p className="text-xs text-blue-600 mt-0.5">
-              {todayIntervencoes.map(i => i.titulo).join(' · ')}
+              {todayIntervencoes.map(i => i.titulo).join(' Â· ')}
             </p>
           </div>
           <button onClick={() => setSelectedDay({ date: todayStr, intervencoes: todayIntervencoes })}
@@ -186,7 +186,7 @@ export default function AdminAgenda() {
           </div>
           <select value={filterTecnico} onChange={e => setFilterTecnico(e.target.value)}
             className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500">
-            <option value="">Todos os técnicos</option>
+            <option value="">Todos os tÃ©cnicos</option>
             {tecnicos.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
@@ -194,13 +194,13 @@ export default function AdminAgenda() {
             <option value="">Todos os estados</option>
             <option value="Aberto">Aberto</option>
             <option value="Em Andamento">Em Andamento</option>
-            <option value="Concluído">Concluído</option>
+            <option value="ConcluÃ­do">ConcluÃ­do</option>
           </select>
           <input value={filterCliente} onChange={e => setFilterCliente(e.target.value)}
             placeholder="Filtrar por empresa ou cliente..."
             className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500" />
           <input value={filterIntervencao} onChange={e => setFilterIntervencao(e.target.value)}
-            placeholder="Filtrar por intervenção..."
+            placeholder="Filtrar por intervenÃ§Ã£o..."
             className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 outline-none focus:border-blue-500" />
           <input
             type="date"
@@ -267,7 +267,7 @@ export default function AdminAgenda() {
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500 pl-4">
                     <User size={11} className="text-blue-500" />
-                    <span><strong>Técnico:</strong> {i.tecnicoNome}</span>
+                    <span><strong>TÃ©cnico:</strong> {i.tecnicoNome}</span>
                   </div>
                   {i.dataAgendada && (
                     <div className="flex items-center gap-1.5 text-xs text-gray-500 pl-4">
@@ -279,13 +279,13 @@ export default function AdminAgenda() {
                   {(i.horaInicio || i.horaFim) && (
                     <div className="flex items-center gap-1.5 text-xs text-gray-500 pl-4">
                       <Clock size={11} />
-                      <span><strong>Hora técnico:</strong> {i.horaInicio ?? '--:--'} ? {i.horaFim ?? '--:--'}</span>
+                      <span><strong>Hora tÃ©cnico:</strong> {i.horaInicio ?? '--:--'} ? {i.horaFim ?? '--:--'}</span>
                     </div>
                   )}
 
                   {i.descricao && (
                     <div className="flex items-center gap-1.5 text-xs text-gray-500 pl-4">
-                      <span><strong>Descrição:</strong> {i.descricao}</span>
+                      <span><strong>DescriÃ§Ã£o:</strong> {i.descricao}</span>
                     </div>
                   )}
                 </div>
