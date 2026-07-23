@@ -1,5 +1,5 @@
 import { Clock, Save, Calendar, Loader } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect, useCallback } from "react";
 import { intervencoesAPI, registrosHorasAPI, tecnicosAPI } from "../../services/api";
 
@@ -23,6 +23,8 @@ export default function TecnicoIntervencaoManual() {
 
     const usuarioId = localStorage.getItem("userId");
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const intervencaoIdUrl = searchParams.get("intervencaoId");
 
     const carregarDados = useCallback(async (tId: string) => {
         const [ir, rr] = await Promise.all([
@@ -51,6 +53,12 @@ export default function TecnicoIntervencaoManual() {
             } catch { setLoading(false); }
         })();
     }, [usuarioId, carregarDados]);
+
+    useEffect(() => {
+        if (intervencaoIdUrl && intervencoes.some(i => i.id === intervencaoIdUrl)) {
+            setIntervId(intervencaoIdUrl);
+        }
+    }, [intervencoes, intervencaoIdUrl]);
 
     const handleGuardar = async () => {
         if (!intervId) return setMsg({ tipo: "erro", texto: "Selecione uma intervenção." });

@@ -16,6 +16,7 @@ export default function TecnicoIntervencoes() {
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [filtroPrioridade, setFiltroPrioridade] = useState("Todos");
   const [mostrarEdicao, setMostrarEdicao] = useState(false);
   const [intervencaoEditando, setIntervencaoEditando] = useState<any>(null);
   const [menuPos, setMenuPos] = useState<{ id: string; top: number; left: number } | null>(null);
@@ -100,8 +101,14 @@ export default function TecnicoIntervencoes() {
 
   const intervencoesFiltradas = (intervencoes || []).filter(intervencao => {
     const matchStatus = filtroStatus === "Todos" || intervencao.status === filtroStatus;
-    const matchSearch = (intervencao.titulo || "").toLowerCase().includes(searchTerm.toLowerCase());
-    return matchStatus && matchSearch;
+    const matchPrioridade = filtroPrioridade === "Todos" || intervencao.prioridade === filtroPrioridade;
+    const termo = searchTerm.toLowerCase();
+    const matchSearch =
+      (intervencao.titulo || "").toLowerCase().includes(termo) ||
+      (intervencao.empresaNome || "").toLowerCase().includes(termo) ||
+      (intervencao.clienteNome || "").toLowerCase().includes(termo) ||
+      (intervencao.numero || "").toLowerCase().includes(termo);
+    return matchStatus && matchPrioridade && matchSearch;
   });
 
   if (loading) return (
@@ -163,12 +170,12 @@ export default function TecnicoIntervencoes() {
           <Filter className="w-5 h-5 text-gray-600" />
           <h3 className="font-semibold text-gray-900">Filtros</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input type="text" placeholder="Buscar intervenções..." value={searchTerm}
+              <input type="text" placeholder="Buscar por título, cliente, empresa..." value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
             </div>
@@ -184,6 +191,14 @@ export default function TecnicoIntervencoes() {
               <option>Concluído</option>
             </select>
           </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Prioridade</label>
+            <select value={filtroPrioridade} onChange={(e) => setFiltroPrioridade(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option>Todos</option><option>Baixa</option><option>Média</option><option>Alta</option>
+            </select>
+          </div>
+
         </div>
       </div>
       <div className="space-y-4">

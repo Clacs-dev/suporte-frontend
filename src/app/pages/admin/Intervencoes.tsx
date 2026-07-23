@@ -15,7 +15,7 @@ export default function AdminIntervencoes() {
   const [mostrarEdicaoCompleta, setMostrarEdicaoCompleta] = useState(false);
   const [intervencaoEditando, setIntervencaoEditando] = useState<any>(null);
   const [tecnicoSelecionado, setTecnicoSelecionado] = useState("");
-  const [arquivosAnexados, setArquivosAnexados] = useState<Array<{ nome: string, tipo: string, tamanho: number, preview?: string }>>([]);
+  const [arquivosAnexados, setArquivosAnexados] = useState<Array<{ nome: string, tipo: string, tamanho: number, preview?: string, url?: string }>>([]);
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
   const [tecnicos, setTecnicos] = useState<any[]>([]);
@@ -23,16 +23,18 @@ export default function AdminIntervencoes() {
   const [loading, setLoading] = useState(true);
   const [mostrarPDF, setMostrarPDF] = useState(false);
   const [menuAbertoId, setMenuAbertoId] = useState<string | null>(null);
+  const [imagensVer, setImagensVer] = useState<any[] | null>(null);
   const [pdfUrl, setPdfUrl] = useState("");
 
   const [formData, setFormData] = useState({
     clienteId: "", tecnicoId: "", titulo: "", descricao: "",
     categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "",
+    modoResolucao: "",
   });
 
   const [formEditar, setFormEditar] = useState({
     titulo: "", descricao: "", categoria: "Geral",
-    prioridade: "Média", status: "Aberto", tecnicoId: ""
+    prioridade: "Média", status: "Aberto", tecnicoId: "", modoResolucao: "",
   });
 
   useEffect(() => { carregarDados(); }, []);
@@ -63,11 +65,13 @@ export default function AdminIntervencoes() {
         categoria: formData.categoria, prioridade: formData.prioridade,
         clienteId: formData.clienteId, tecnicoId: formData.tecnicoId || null,
         data_agendada: formData.dataAgendada || null,
-        anexos: arquivosAnexados
+        modo_resolucao: formData.modoResolucao || null,
+        anexos: arquivosAnexados.filter(a => a.url).map(a => ({ url: a.url, nome: a.nome, tipo: a.tipo })),
+
       });
       if (response.success) {
         setMostrarFormulario(false);
-        setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "" });
+        setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "", modoResolucao: "" });
         setArquivosAnexados([]);
         carregarDados();
         toast.success('Intervenção criada com sucesso!');
@@ -88,7 +92,8 @@ export default function AdminIntervencoes() {
       categoria: intervencao.categoria || "Geral",
       prioridade: intervencao.prioridade || "Média",
       status: intervencao.status || "Aberto",
-      tecnicoId: intervencao.tecnicoId || intervencao.tecnico_id || ""
+      tecnicoId: intervencao.tecnicoId || intervencao.tecnico_id || "",
+      modoResolucao: intervencao.modoResolucao || intervencao.modo_resolucao || "",
     });
     setMostrarEdicaoCompleta(true);
   };
@@ -103,7 +108,8 @@ export default function AdminIntervencoes() {
         categoria: formEditar.categoria,
         prioridade: formEditar.prioridade,
         status: formEditar.status,
-        tecnico_id: formEditar.tecnicoId || null
+        tecnico_id: formEditar.tecnicoId || null,
+        modo_resolucao: formEditar.modoResolucao || null,
       });
       if (response.success) {
         setMostrarEdicaoCompleta(false);
@@ -197,22 +203,40 @@ export default function AdminIntervencoes() {
       (intervencao.clienteNome || "").toLowerCase().includes(termo);
     return matchStatus && matchPrioridade && matchSearch;
   });
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    const novosArquivos = Array.from(files).map(file => {
-      const arquivo = { nome: file.name, tipo: file.type, tamanho: file.size, preview: undefined as string | undefined };
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          arquivo.preview = reader.result as string;
-          setArquivosAnexados(prev => [...prev.filter(a => a.nome !== arquivo.nome), arquivo]);
-        };
-        reader.readAsDataURL(file);
-      }
-      return arquivo;
+
+  const CLOUD_NAME = "dkcq4gtxp";
+  const UPLOAD_PRESET = "clacs_anexos";
+
+  async function enviarParaCloudinary(file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("upload_preset", UPLOAD_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+      method: "POST",
+      body: form,
     });
-    setArquivosAnexados(prev => [...prev, ...novosArquivos.filter(a => !a.preview)]);
+    if (!res.ok) throw new Error("Falha no upload");
+    const data = await res.json();
+    return data.secure_url as string;
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    for (const file of files) {
+      const temp = { nome: file.name, tipo: file.type, tamanho: file.size, preview: undefined as string | undefined, url: undefined as string | undefined };
+      setArquivosAnexados(prev => [...prev, temp]);
+      try {
+        const url = await enviarParaCloudinary(file);
+        setArquivosAnexados(prev => prev.map(a =>
+          a.nome === file.name ? { ...a, url, preview: file.type.startsWith("image/") ? url : undefined } : a
+        ));
+      } catch {
+        toast.error(`Erro ao carregar ${file.name}`);
+        setArquivosAnexados(prev => prev.filter(a => a.nome !== file.name));
+      }
+    }
   };
 
   const removerArquivo = (index: number) => setArquivosAnexados(prev => prev.filter((_, i) => i !== index));
@@ -311,7 +335,7 @@ export default function AdminIntervencoes() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
                 <select value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
@@ -333,6 +357,16 @@ export default function AdminIntervencoes() {
                   <option>Aberto</option><option>Em Andamento</option><option>Aguardando Cliente</option><option>Concluído</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Modo de Resolução</label>
+                <select value={formData.modoResolucao} onChange={(e) => setFormData({ ...formData, modoResolucao: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Não definido</option>
+                  <option value="Remoto">Remoto</option>
+                  <option value="Presencial">Presencial</option>
+                </select>
+              </div>
+
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Anexar Imagens ou Documentos</label>
@@ -467,6 +501,13 @@ export default function AdminIntervencoes() {
                             <FileText className="w-4 h-4" /> Baixar PDF
                           </button>
 
+                          {(intervencao.anexos?.length > 0) && (
+                            <button onClick={() => { setImagensVer(intervencao.anexos); setMenuAbertoId(null); }}
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                              <File className="w-4 h-4" /> Ver Imagens ({intervencao.anexos.length})
+                            </button>
+                          )}
+
                           <button onClick={() => { abrirEdicaoCompleta(intervencao); setMenuAbertoId(null); }}
                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-blue-700 hover:bg-blue-50 transition-colors">
                             <Edit className="w-4 h-4" /> Editar
@@ -506,7 +547,7 @@ export default function AdminIntervencoes() {
       {/* Modal Edição Completa */}
       {mostrarEdicaoCompleta && intervencaoEditando && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-xl font-semibold text-gray-900">Editar Intervenção</h3>
               <button onClick={() => { setMostrarEdicaoCompleta(false); setIntervencaoEditando(null); }} className="text-gray-400 hover:text-gray-600"><X className="w-6 h-6" /></button>
@@ -544,6 +585,16 @@ export default function AdminIntervencoes() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option>Aberto</option><option>Em Andamento</option><option>Aguardando Cliente</option><option>Resolvido</option><option>Concluído</option>
                 </select>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Modo de Resolução</label>
+                  <select value={formEditar.modoResolucao} onChange={(e) => setFormEditar({ ...formEditar, modoResolucao: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Não definido</option>
+                    <option value="Remoto">Remoto</option>
+                    <option value="Presencial">Presencial</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Técnico</label>
@@ -599,6 +650,35 @@ export default function AdminIntervencoes() {
             </div>
             <div className="flex-1 bg-gray-100">
               <iframe src={pdfUrl} title="PDF" className="w-full h-full" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {imagensVer && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Imagens da Intervenção</h2>
+              <button onClick={() => setImagensVer(null)} className="p-2 hover:bg-gray-100 rounded-lg">
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto grid grid-cols-1 gap-4">
+              {imagensVer.map((a: any, idx: number) => (
+                a.tipo?.startsWith("image") ? (
+                  <a key={idx} href={a.url} target="_blank" rel="noreferrer" className="block">
+                    <img src={a.url} alt={a.nome} className="w-full max-h-80 object-contain bg-gray-50 rounded-lg border border-gray-200 hover:opacity-90" />
+                    <p className="text-xs text-gray-500 mt-1 truncate">{a.nome}</p>
+                  </a>
+                ) : (
+                  <a key={idx} href={a.url} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                    <File className="w-5 h-5 text-blue-600" />
+                    <span className="text-sm text-gray-700 truncate">{a.nome}</span>
+                  </a>
+                )
+              ))}
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Plus, Search, Star, MessageCircle, Upload, File, Image, X, Loader, CheckCircle, FileText } from "lucide-react";
+import { Plus, Search, Filter, Star, MessageCircle, Upload, File, Image, X, Loader, CheckCircle, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { intervencoesAPI, clientesAPI, contratosAPI } from "../../services/api";
 import { toast } from "sonner";
@@ -6,10 +6,28 @@ const API_BASE_URL = window.location.hostname === "localhost"
   ? "http://localhost:8001"
   : "https://suporte-backend-l9hm.onrender.com";
 
+const CLOUD_NAME = "dkcq4gtxp";
+const UPLOAD_PRESET = "clacs_anexos";
+
+async function enviarParaCloudinary(file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("upload_preset", UPLOAD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) throw new Error("Falha no upload");
+  const data = await res.json();
+  return data.secure_url as string;
+}
+
 export default function ClienteIntervencoes() {
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
   const [contratos, setContratos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filtroStatus, setFiltroStatus] = useState("Todos");
+  const [filtroPrioridade, setFiltroPrioridade] = useState("Todos");
   const [modalAberto, setModalAberto] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [novaIntervencao, setNovaIntervencao] = useState({
@@ -118,7 +136,7 @@ export default function ClienteIntervencoes() {
         categoria: novaIntervencao.categoria,
         prioridade: novaIntervencao.prioridade,
         clienteId: clienteId ?? "",
-        anexos: novaIntervencao.anexos || []
+        anexos: (novaIntervencao.anexos || []).filter((a: any) => a.url).map((a: any) => ({ url: a.url, nome: a.nome, tipo: a.tipo }))
       });
 
       if (response.success) {
@@ -190,10 +208,14 @@ export default function ClienteIntervencoes() {
   };
 
   const intervencoesFiltradas = (intervencoes || []).filter(i => {
-    const titulo = i.titulo || "";
-    const descricao = i.descricao || "";
-    return titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      descricao.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchStatus = filtroStatus === "Todos" || i.status === filtroStatus;
+    const matchPrioridade = filtroPrioridade === "Todos" || i.prioridade === filtroPrioridade;
+    const termo = searchTerm.toLowerCase();
+    const matchSearch =
+      (i.titulo || "").toLowerCase().includes(termo) ||
+      (i.descricao || "").toLowerCase().includes(termo) ||
+      (i.numero || "").toLowerCase().includes(termo);
+    return matchStatus && matchPrioridade && matchSearch;
   });
 
   if (loading) {
@@ -266,18 +288,32 @@ export default function ClienteIntervencoes() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar intervenções..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+        <div className="flex items-center gap-2 mb-4"><Filter className="w-5 h-5 text-gray-600" /><h3 className="font-semibold text-gray-900">Filtros</h3></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Buscar</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input type="text" placeholder="Buscar por título, descrição, número..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Status</label>
+            <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+              <option>Todos</option><option>Aberto</option><option>Em Andamento</option><option>Resolvido</option><option>Fechado</option><option>Concluído</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Prioridade</label>
+            <select value={filtroPrioridade} onChange={(e) => setFiltroPrioridade(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+              <option>Todos</option><option>Baixa</option><option>Média</option><option>Alta</option>
+            </select>
+          </div>
         </div>
       </div>
-
       {intervencoesFiltradas.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <p className="text-gray-500">
@@ -459,14 +495,19 @@ export default function ClienteIntervencoes() {
                     accept=".pdf,.png,.jpg,.jpeg"
                     className="hidden"
                     id="fileInput"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const files = Array.from(e.target.files || []);
-                      const novosAnexos = files.map(file => ({
-                        nome: file.name,
-                        tipo: file.type,
-                        tamanho: file.size
-                      }));
-                      setNovaIntervencao({ ...novaIntervencao, anexos: [...novaIntervencao.anexos, ...novosAnexos] });
+                      for (const file of files) {
+                        try {
+                          const url = await enviarParaCloudinary(file);
+                          setNovaIntervencao(prev => ({
+                            ...prev,
+                            anexos: [...prev.anexos, { nome: file.name, tipo: file.type, tamanho: file.size, url }]
+                          }));
+                        } catch {
+                          toast.error(`Erro ao carregar ${file.name}`);
+                        }
+                      }
                     }}
                   />
                   <label htmlFor="fileInput" className="inline-block mt-2 px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg cursor-pointer transition-colors">
