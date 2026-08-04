@@ -29,12 +29,12 @@ export default function AdminIntervencoes() {
   const [formData, setFormData] = useState({
     clienteId: "", tecnicoId: "", titulo: "", descricao: "",
     categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "",
-    modoResolucao: "",
+    modoResolucao: "", solicitante: "",
   });
 
   const [formEditar, setFormEditar] = useState({
     titulo: "", descricao: "", categoria: "Geral",
-    prioridade: "Média", status: "Aberto", tecnicoId: "", modoResolucao: "",
+    prioridade: "Média", status: "Aberto", tecnicoId: "", modoResolucao: "", solicitante: "",
   });
 
   useEffect(() => { carregarDados(); }, []);
@@ -66,12 +66,13 @@ export default function AdminIntervencoes() {
         clienteId: formData.clienteId, tecnicoId: formData.tecnicoId || null,
         data_agendada: formData.dataAgendada || null,
         modo_resolucao: formData.modoResolucao || null,
+        solicitante: formData.solicitante || null,
         anexos: arquivosAnexados.filter(a => a.url).map(a => ({ url: a.url, nome: a.nome, tipo: a.tipo })),
 
       });
       if (response.success) {
         setMostrarFormulario(false);
-        setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "", modoResolucao: "" });
+        setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "", modoResolucao: "", solicitante: "" });
         setArquivosAnexados([]);
         carregarDados();
         toast.success('Intervenção criada com sucesso!');
@@ -94,6 +95,7 @@ export default function AdminIntervencoes() {
       status: intervencao.status || "Aberto",
       tecnicoId: intervencao.tecnicoId || intervencao.tecnico_id || "",
       modoResolucao: intervencao.modoResolucao || intervencao.modo_resolucao || "",
+      solicitante: intervencao.solicitante || "",
     });
     setMostrarEdicaoCompleta(true);
   };
@@ -110,6 +112,7 @@ export default function AdminIntervencoes() {
         status: formEditar.status,
         tecnico_id: formEditar.tecnicoId || null,
         modo_resolucao: formEditar.modoResolucao || null,
+        solicitante: formEditar.solicitante || null,
       });
       if (response.success) {
         setMostrarEdicaoCompleta(false);
@@ -320,6 +323,14 @@ export default function AdminIntervencoes() {
                 placeholder="Descreva brevemente o problema..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Solicitante</label>
+              <input type="text" value={formData.solicitante} onChange={(e) => setFormData({ ...formData, solicitante: e.target.value })}
+                placeholder="Nome de quem solicitou"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Descrição Detalhada</label>
               <textarea rows={4} value={formData.descricao} onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}

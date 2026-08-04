@@ -273,6 +273,7 @@ criar: async (intervencao: {
   data_agendada?: string | null;
   anexos?: any[];
   modo_resolucao?: string | null; 
+  solicitante?: string | null;
 }) => {
     return fetchAPI('/intervencoes', {
       method: 'POST',
@@ -285,6 +286,7 @@ criar: async (intervencao: {
   tecnico_id: intervencao.tecnicoId,
   data_agendada: intervencao.data_agendada,
   modo_resolucao: intervencao.modo_resolucao,
+  solicitante: intervencao.solicitante,
   anexos: intervencao.anexos,
 }),
     });
