@@ -12,6 +12,9 @@ export default function ClienteContratos() {
   const [loading, setLoading] = useState(true);
   const [clienteId, setClienteId] = useState<string | null>(null);
   const usuarioId = localStorage.getItem('userId');
+  const [modalRelatorio, setModalRelatorio] = useState<string | null>(null);
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
 
   useEffect(() => {
     carregarClienteId();
@@ -63,7 +66,19 @@ export default function ClienteContratos() {
   };
 
   const handleExportarRelatorio = (contratoId: string) => {
-    window.open(`${API_BASE_URL}/relatorios/contrato/${contratoId}/cliente`, '_blank');
+    setModalRelatorio(contratoId);
+  };
+
+  const gerarRelatorio = () => {
+    if (!modalRelatorio) return;
+    const params = new URLSearchParams();
+    if (dataInicio) params.append("data_inicio", dataInicio);
+    if (dataFim) params.append("data_fim", dataFim);
+    const query = params.toString() ? `?${params.toString()}` : "";
+    window.open(`${API_BASE_URL}/relatorios/contrato/${modalRelatorio}/cliente${query}`, '_blank');
+    setModalRelatorio(null);
+    setDataInicio("");
+    setDataFim("");
   };
 
   if (loading) {
@@ -339,6 +354,35 @@ export default function ClienteContratos() {
           })}
         </div>
       )}
+
+      {modalRelatorio && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Exportar Relatório</h2>
+            <p className="text-sm text-gray-600 mb-4">Escolha o período. Deixe em branco para incluir todas as intervenções.</p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
+                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => { setModalRelatorio(null); setDataInicio(""); setDataFim(""); }}
+                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium">Cancelar</button>
+              <button onClick={gerarRelatorio}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Gerar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+
+
   );
 }
