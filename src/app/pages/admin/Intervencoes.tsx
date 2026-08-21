@@ -1,5 +1,6 @@
 import { Search, Plus, Filter, Upload, File, X, Loader, Edit, CheckCircle, FileText, Trash2, MoreVertical, ChevronDown } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router";
 import { intervencoesAPI, clientesAPI, tecnicosAPI } from "../../services/api";
 import { toast } from "sonner";
 const API_BASE_URL = window.location.hostname === "localhost"
@@ -20,22 +21,40 @@ export default function AdminIntervencoes() {
   const [clientes, setClientes] = useState<any[]>([]);
   const [tecnicos, setTecnicos] = useState<any[]>([]);
   const [dropdownClienteAberto, setDropdownClienteAberto] = useState(false);
+  const [filtroCliente, setFiltroCliente] = useState("");
+  const [filtroTecnico, setFiltroTecnico] = useState("");
+  const [dropdownTecnicoAberto, setDropdownTecnicoAberto] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mostrarPDF, setMostrarPDF] = useState(false);
   const [menuAbertoId, setMenuAbertoId] = useState<string | null>(null);
   const [imagensVer, setImagensVer] = useState<any[] | null>(null);
   const [pdfUrl, setPdfUrl] = useState("");
+  const [searchParams] = useSearchParams();
+  const [destaqueId, setDestaqueId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     clienteId: "", tecnicoId: "", titulo: "", descricao: "",
-    categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "",
+    categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "", dataCriacao: new Date().toISOString().slice(0, 10),
     modoResolucao: "", solicitante: "",
   });
 
   const [formEditar, setFormEditar] = useState({
     titulo: "", descricao: "", categoria: "Geral",
-    prioridade: "Média", status: "Aberto", tecnicoId: "", modoResolucao: "", solicitante: "",
+    prioridade: "Média", status: "Aberto", tecnicoId: "", modoResolucao: "", solicitante: "", dataCriacao: "",
   });
+
+  useEffect(() => {
+    const destaque = searchParams.get("destaque");
+    if (destaque) {
+      setDestaqueId(destaque);
+      setTimeout(() => {
+        const el = document.getElementById(`intervencao-${destaque}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+      const timer = setTimeout(() => setDestaqueId(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   useEffect(() => { carregarDados(); }, []);
 
@@ -65,6 +84,7 @@ export default function AdminIntervencoes() {
         categoria: formData.categoria, prioridade: formData.prioridade,
         clienteId: formData.clienteId, tecnicoId: formData.tecnicoId || null,
         data_agendada: formData.dataAgendada || null,
+        data_criacao: formData.dataCriacao || null,
         modo_resolucao: formData.modoResolucao || null,
         solicitante: formData.solicitante || null,
         anexos: arquivosAnexados.filter(a => a.url).map(a => ({ url: a.url, nome: a.nome, tipo: a.tipo })),
@@ -72,7 +92,7 @@ export default function AdminIntervencoes() {
       });
       if (response.success) {
         setMostrarFormulario(false);
-        setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "", modoResolucao: "", solicitante: "" });
+        setFormData({ clienteId: "", tecnicoId: "", titulo: "", descricao: "", categoria: "Geral", prioridade: "Média", status: "Aberto", dataAgendada: "", modoResolucao: "", solicitante: "", dataCriacao: new Date().toISOString().slice(0, 10) });
         setArquivosAnexados([]);
         carregarDados();
         toast.success('Intervenção criada com sucesso!');
@@ -96,6 +116,7 @@ export default function AdminIntervencoes() {
       tecnicoId: intervencao.tecnicoId || intervencao.tecnico_id || "",
       modoResolucao: intervencao.modoResolucao || intervencao.modo_resolucao || "",
       solicitante: intervencao.solicitante || "",
+      dataCriacao: (intervencao.dataCriacao || intervencao.data_criacao || "").slice(0, 10),
     });
     setMostrarEdicaoCompleta(true);
   };
@@ -113,6 +134,7 @@ export default function AdminIntervencoes() {
         tecnico_id: formEditar.tecnicoId || null,
         modo_resolucao: formEditar.modoResolucao || null,
         solicitante: formEditar.solicitante || null,
+        data_criacao: formEditar.dataCriacao || null,
       });
       if (response.success) {
         setMostrarEdicaoCompleta(false);
@@ -279,42 +301,74 @@ export default function AdminIntervencoes() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Cliente *</label>
-                <button type="button" onClick={() => setDropdownClienteAberto(!dropdownClienteAberto)}
-                  className="w-full flex items-center justify-between px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-left text-gray-900">
-                  <span>
-                    {formData.clienteId
-                      ? (() => { const c = clientes.find(c => c.id === formData.clienteId); return c ? (c.empresa || c.nome) : "Selecione o cliente..."; })()
-                      : "Selecione o cliente..."}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-gray-400" />
-                </button>
+
 
                 {/* Input escondido para manter a validação HTML "required" */}
                 <input type="text" required value={formData.clienteId} readOnly tabIndex={-1}
                   className="absolute opacity-0 pointer-events-none h-0 w-0" />
 
+                <input type="text"
+                  value={dropdownClienteAberto
+                    ? filtroCliente
+                    : (formData.clienteId ? (() => { const c = clientes.find(c => c.id === formData.clienteId); return c ? (c.empresa || c.nome) : ""; })() : "")}
+                  onChange={(e) => { setFiltroCliente(e.target.value); setDropdownClienteAberto(true); }}
+                  onFocus={() => { setDropdownClienteAberto(true); setFiltroCliente(""); }}
+                  placeholder="Selecione ou pesquise o cliente..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
                 {dropdownClienteAberto && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setDropdownClienteAberto(false)} />
-                    <div className="absolute left-0 top-full mt-1 w-full max-h-64 overflow-y-auto bg-white rounded-lg shadow-xl border border-gray-200 z-50">
-                      {clientes.filter(c => c.status === "Ativo").map(c => (
+                    <div className="fixed inset-0 z-40" onClick={() => { setDropdownClienteAberto(false); setFiltroCliente(""); }} />
+                    <div className="absolute left-0 top-full mt-1 w-full bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-56 overflow-y-auto">
+                      {clientes.filter(c => c.status === "Ativo" &&
+                        (c.empresa || c.nome || "").toLowerCase().includes(filtroCliente.toLowerCase())
+                      ).map(c => (
                         <button key={c.id} type="button"
-                          onClick={() => { setFormData({ ...formData, clienteId: c.id }); setDropdownClienteAberto(false); }}
+                          onClick={() => { setFormData({ ...formData, clienteId: c.id }); setDropdownClienteAberto(false); setFiltroCliente(""); }}
                           className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
                           {c.empresa || c.nome}
                         </button>
                       ))}
+                      {clientes.filter(c => c.status === "Ativo" &&
+                        (c.empresa || c.nome || "").toLowerCase().includes(filtroCliente.toLowerCase())
+                      ).length === 0 && (
+                          <p className="px-4 py-3 text-sm text-gray-400">Nenhum cliente encontrado</p>
+                        )}
                     </div>
                   </>
                 )}
               </div>
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Técnico</label>
-                <select value={formData.tecnicoId} onChange={(e) => setFormData({ ...formData, tecnicoId: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="">Selecione o técnico...</option>
-                  {tecnicos.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
-                </select>
+                <input type="text"
+                  value={dropdownTecnicoAberto
+                    ? filtroTecnico
+                    : (formData.tecnicoId ? (() => { const t = tecnicos.find(t => t.id === formData.tecnicoId); return t ? t.nome : ""; })() : "")}
+                  onChange={(e) => { setFiltroTecnico(e.target.value); setDropdownTecnicoAberto(true); }}
+                  onFocus={() => { setDropdownTecnicoAberto(true); setFiltroTecnico(""); }}
+                  placeholder="Selecione ou pesquise o técnico..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+                {dropdownTecnicoAberto && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => { setDropdownTecnicoAberto(false); setFiltroTecnico(""); }} />
+                    <div className="absolute left-0 top-full mt-1 w-full bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-56 overflow-y-auto">
+                      <button type="button"
+                        onClick={() => { setFormData({ ...formData, tecnicoId: "" }); setDropdownTecnicoAberto(false); setFiltroTecnico(""); }}
+                        className="w-full text-left px-4 py-2.5 text-sm text-gray-500 hover:bg-blue-50 transition-colors">
+                        Sem técnico
+                      </button>
+                      {tecnicos.filter(t => (t.nome || "").toLowerCase().includes(filtroTecnico.toLowerCase())).map(t => (
+                        <button key={t.id} type="button"
+                          onClick={() => { setFormData({ ...formData, tecnicoId: t.id }); setDropdownTecnicoAberto(false); setFiltroTecnico(""); }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-colors">
+                          {t.nome}
+                        </button>
+                      ))}
+                      {tecnicos.filter(t => (t.nome || "").toLowerCase().includes(filtroTecnico.toLowerCase())).length === 0 && (
+                        <p className="px-4 py-3 text-sm text-gray-400">Nenhum técnico encontrado</p>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
             <div>
@@ -346,6 +400,14 @@ export default function AdminIntervencoes() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Data de Criação</label>
+              <input type="date" value={formData.dataCriacao}
+                onChange={(e) => setFormData({ ...formData, dataCriacao: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
@@ -466,7 +528,7 @@ export default function AdminIntervencoes() {
             const cliente = clientes.find(c => c.id === intervencao.clienteId);
             const tecnico = tecnicos.find(t => t.id === intervencao.tecnicoId);
             return (
-              <div key={intervencao.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div key={intervencao.id} id={`intervencao-${intervencao.id}`} className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all ${destaqueId === intervencao.id ? "border-blue-500 ring-2 ring-blue-400 bg-blue-50" : "border-gray-200"}`}>
                 <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                   <div className="flex-1">
                     <div className="flex items-start gap-3 mb-3">
@@ -479,6 +541,12 @@ export default function AdminIntervencoes() {
                           <div className="flex items-center gap-2"><span className="text-gray-500">Técnico:</span><span className="font-medium text-gray-900">{tecnico ? tecnico.nome : intervencao.tecnicoNome || 'Não atribuído'}</span></div>
                           <div className="flex items-center gap-2"><span className="text-gray-500">Categoria:</span><span className="font-medium text-gray-900">{intervencao.categoria}</span></div>
                           <div className="flex items-center gap-2"><span className="text-gray-500">Criado:</span><span className="font-medium text-gray-900">{new Date(intervencao.dataCriacao).toLocaleDateString('pt-AO')}</span></div>
+                          {intervencao.dataResolucao && (
+                            <div className="flex items-center gap-2"><span className="text-gray-500">Resolvido:</span><span className="font-medium text-green-700">{new Date(intervencao.dataResolucao).toLocaleString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
+                          )}
+                          {intervencao.dataFecho && (
+                            <div className="flex items-center gap-2"><span className="text-gray-500">Fechado:</span><span className="font-medium text-blue-700">{new Date(intervencao.dataFecho).toLocaleString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -606,6 +674,14 @@ export default function AdminIntervencoes() {
                     <option value="Presencial">Presencial</option>
                   </select>
                 </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Data de Criação</label>
+                  <input type="date" value={formEditar.dataCriacao}
+                    onChange={(e) => setFormEditar({ ...formEditar, dataCriacao: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Técnico</label>

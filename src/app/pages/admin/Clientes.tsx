@@ -17,7 +17,8 @@ export default function AdminClientes() {
     email: "",
     telefone: "",
     senha: "",
-    status: "Ativo"
+    status: "Ativo",
+    tipoCliente: "Com Contrato"
   });
 
   useEffect(() => { carregarClientes(); }, []);
@@ -37,10 +38,10 @@ export default function AdminClientes() {
   const abrirModal = (cliente?: any) => {
     if (cliente) {
       setClienteEditando(cliente);
-      setFormData({ nome: cliente.nome, empresa: cliente.empresa, email: cliente.email, telefone: cliente.telefone || "", senha: "", status: cliente.status });
+      setFormData({ nome: cliente.nome, empresa: cliente.empresa, email: cliente.email, telefone: cliente.telefone || "", senha: "", status: cliente.status, tipoCliente: cliente.tipoCliente || cliente.tipo_cliente || "Com Contrato" });
     } else {
       setClienteEditando(null);
-      setFormData({ nome: "", empresa: "", email: "", telefone: "", senha: "", status: "Ativo" });
+      setFormData({ nome: "", empresa: "", email: "", telefone: "", senha: "", status: "Ativo", tipoCliente: "Com Contrato" });
     }
     setModalAberto(true);
   };
@@ -48,14 +49,14 @@ export default function AdminClientes() {
   const fecharModal = () => {
     setModalAberto(false);
     setClienteEditando(null);
-    setFormData({ nome: "", empresa: "", email: "", telefone: "", senha: "", status: "Ativo" });
+    setFormData({ nome: "", empresa: "", email: "", telefone: "", senha: "", status: "Ativo", tipoCliente: "Com Contrato" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (clienteEditando) {
-        const response = await clientesAPI.atualizar(clienteEditando.id, formData);
+        const response = await clientesAPI.atualizar(clienteEditando.id, { ...formData, tipo_cliente: formData.tipoCliente });
         if (response.success) {
           const res = await clientesAPI.listar();
           if (res.success) setClientes(res.data);
@@ -65,7 +66,7 @@ export default function AdminClientes() {
           toast.error(response.error || 'Erro ao actualizar cliente');
         }
       } else {
-        const response = await clientesAPI.criar(formData);
+        const response = await clientesAPI.criar({ ...formData, tipo_cliente: formData.tipoCliente });
         if (response.success) {
           setClientes([...clientes, response.data]);
           toast.success('Cliente criado com sucesso!');
@@ -117,7 +118,11 @@ export default function AdminClientes() {
   const filteredClientes = clientes.filter(cliente => {
     const matchSearch = cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (cliente.empresa || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatus = filtroStatus === "Todos" || cliente.status === filtroStatus;
+    const matchStatus =
+      filtroStatus === "Todos" ||
+      (filtroStatus === "Sem Contrato"
+        ? (cliente.tipoCliente || cliente.tipo_cliente) === "Sem Contrato"
+        : cliente.status === filtroStatus);
     return matchSearch && matchStatus;
   });
 
@@ -159,6 +164,7 @@ export default function AdminClientes() {
             <option>Todos</option>
             <option>Ativo</option>
             <option>Inativo</option>
+            <option>Sem Contrato</option>
           </select>
         </div>
       </div>
@@ -272,6 +278,15 @@ export default function AdminClientes() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option>Ativo</option>
                   <option>Inativo</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Cliente</label>
+                <select value={formData.tipoCliente} onChange={(e) => setFormData({ ...formData, tipoCliente: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option>Com Contrato</option>
+                  <option>Sem Contrato</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-4 border-t border-gray-200">

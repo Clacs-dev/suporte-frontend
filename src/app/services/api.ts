@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  window.location.hostname === "localhost"
+  window.location.hostname === "https://3434df.electrosoftwares.com"
     ? "http://localhost:8001"
     : "https://suporte-backend-l9hm.onrender.com";
 // Obter token de autenticação do localStorage
@@ -145,6 +145,7 @@ export const clientesAPI = {
     telefone?: string;
     senha?: string;
     status?: string;
+    tipo_cliente?: string;
     empresa?: string;
   }) => {
     console.log('=== API FRONTEND: clientesAPI.criar() chamado ===');
@@ -274,6 +275,7 @@ criar: async (intervencao: {
   anexos?: any[];
   modo_resolucao?: string | null; 
   solicitante?: string | null;
+  data_criacao?: string | null;
 }) => {
     return fetchAPI('/intervencoes', {
       method: 'POST',
@@ -287,6 +289,7 @@ criar: async (intervencao: {
   data_agendada: intervencao.data_agendada,
   modo_resolucao: intervencao.modo_resolucao,
   solicitante: intervencao.solicitante,
+   data_criacao: intervencao.data_criacao,
   anexos: intervencao.anexos,
 }),
     });

@@ -70,6 +70,7 @@ export const router = createBrowserRouter([
       { path: "dashboard", Component: ClienteDashboard },
       { path: "intervencoes", Component: ClienteIntervencoes },
       { path: "contratos", Component: ClienteContratos },
+
     ],
   },
 ]);

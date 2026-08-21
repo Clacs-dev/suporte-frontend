@@ -1,6 +1,7 @@
 import { Search, Filter, Loader, CheckCircle, FileText, Edit, X, MoreVertical } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router";
 import { intervencoesAPI } from "../../services/api";
 import { toast } from "sonner";
 import { maskId } from "../../services/MaskId";
@@ -24,8 +25,24 @@ export default function TecnicoIntervencoes() {
     titulo: "", descricao: "", categoria: "Geral", prioridade: "Média"
   });
 
+  const [searchParams] = useSearchParams();
+  const [destaqueId, setDestaqueId] = useState<string | null>(null);
+
   const tecnicoId = localStorage.getItem('tecnicoId') || localStorage.getItem('userId') || '';
   const nomeTecnico = localStorage.getItem('userName') || 'Técnico';
+
+  useEffect(() => {
+    const destaque = searchParams.get("destaque");
+    if (destaque) {
+      setDestaqueId(destaque);
+      setTimeout(() => {
+        const el = document.getElementById(`intervencao-${destaque}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+      const timer = setTimeout(() => setDestaqueId(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   useEffect(() => { carregarIntervencoes(); }, []);
 
@@ -208,7 +225,7 @@ export default function TecnicoIntervencoes() {
           </div>
         ) : (
           intervencoesFiltradas.map(intervencao => (
-            <div key={intervencao.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div key={intervencao.id} id={`intervencao-${intervencao.id}`} className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all ${destaqueId === intervencao.id ? "border-blue-500 ring-2 ring-blue-400 bg-blue-50" : "border-gray-200"}`}>
               <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                 <div className="flex-1">
                   <div className="flex items-start gap-3 mb-3">
@@ -220,6 +237,13 @@ export default function TecnicoIntervencoes() {
                         <div className="flex items-center gap-2"><span className="text-gray-500">Cliente:</span><span className="font-medium text-gray-900">{intervencao.empresaNome || intervencao.clienteNome}</span></div>
                         <div className="flex items-center gap-2"><span className="text-gray-500">Categoria:</span><span className="font-medium text-gray-900">{intervencao.categoria}</span></div>
                         <div className="flex items-center gap-2"><span className="text-gray-500">Criado:</span><span className="font-medium text-gray-900">{new Date(intervencao.dataCriacao).toLocaleDateString('pt-AO')}</span></div>
+                        {intervencao.dataResolucao && (
+                          <div className="flex items-center gap-2"><span className="text-gray-500">Resolvido:</span><span className="font-medium text-green-700">{new Date(intervencao.dataResolucao).toLocaleString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
+                        )}
+
+                        {intervencao.dataFecho && (
+                          <div className="flex items-center gap-2"><span className="text-gray-500">Fechado:</span><span className="font-medium text-blue-700">{new Date(intervencao.dataFecho).toLocaleString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
+                        )}
                       </div>
                     </div>
                   </div>

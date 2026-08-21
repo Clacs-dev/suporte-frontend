@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router";
 import { Bell, CheckCircle, Info, AlertTriangle, Check } from "lucide-react";
 import { notificacoesAPI } from "../services/api";
 
@@ -8,6 +9,7 @@ interface Notificacao {
     mensagem?: string;
     tipo: string;
     lida: boolean;
+    intervencaoId?: string;
     dataCriacao: string;
 }
 
@@ -34,6 +36,8 @@ export default function NotificacaoSino() {
     const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
     const [naoLidas, setNaoLidas] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const carregar = async () => {
         try {
@@ -56,6 +60,17 @@ export default function NotificacaoSino() {
     const handleMarcarLida = async (id: string) => {
         await notificacoesAPI.marcarLida(id);
         carregar();
+    };
+
+    const handleClicar = async (n: Notificacao) => {
+        if (!n.lida) await handleMarcarLida(n.id);
+        setAberto(false);
+        if (n.intervencaoId) {
+            const base = location.pathname.startsWith("/admin") ? "/admin"
+                : location.pathname.startsWith("/tecnico") ? "/tecnico"
+                    : "/cliente";
+            navigate(`${base}/intervencoes?destaque=${n.intervencaoId}`);
+        }
     };
 
     const handleMarcarTodasLidas = async () => {
@@ -94,7 +109,7 @@ export default function NotificacaoSino() {
                                 notificacoes.map((n) => (
                                     <button
                                         key={n.id}
-                                        onClick={() => !n.lida && handleMarcarLida(n.id)}
+                                        onClick={() => handleClicar(n)}
                                         className={`w-full text-left flex items-start gap-2 p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors ${!n.lida ? "bg-blue-50/50" : ""}`}
                                     >
                                         {ICONES[n.tipo] || ICONES.info}

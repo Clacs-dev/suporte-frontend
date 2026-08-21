@@ -25,6 +25,7 @@ export default function AdminLayout() {
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/agenda", label: "Agenda", icon: Calendar },
     { path: "/admin/clientes", label: "Clientes", icon: Users },
+
     { path: "/admin/contratos", label: "Contratos", icon: FileText },
     { path: "/admin/intervencoes", label: "Intervenções", icon: ClipboardList },
     { path: "/admin/tecnicos", label: "Técnicos", icon: Wrench },

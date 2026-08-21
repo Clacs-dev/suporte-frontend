@@ -1,5 +1,6 @@
 import { Plus, Search, Filter, Star, MessageCircle, Upload, File, Image, X, Loader, CheckCircle, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router";
 import { intervencoesAPI, clientesAPI, contratosAPI } from "../../services/api";
 import { toast } from "sonner";
 const API_BASE_URL = window.location.hostname === "localhost"
@@ -38,10 +39,26 @@ export default function ClienteIntervencoes() {
     anexos: [] as any[]
   });
   const [clienteId, setClienteId] = useState<string | null>(null);
+  const [tipoCliente, setTipoCliente] = useState("");
   const usuarioId = localStorage.getItem('userId');
+  const [searchParams] = useSearchParams();
+  const [destaqueId, setDestaqueId] = useState<string | null>(null);
 
   // ✅ Nome do cliente do localStorage
   const nomeCliente = localStorage.getItem('userName') || 'Cliente';
+
+  useEffect(() => {
+    const destaque = searchParams.get("destaque");
+    if (destaque) {
+      setDestaqueId(destaque);
+      setTimeout(() => {
+        const el = document.getElementById(`intervencao-${destaque}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+      const timer = setTimeout(() => setDestaqueId(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     carregarClienteId();
@@ -82,6 +99,7 @@ export default function ClienteIntervencoes() {
       const clienteRes = await clientesAPI.buscarPorUsuarioId(usuarioId);
       if (clienteRes.success && clienteRes.data) {
         setClienteId(clienteRes.data.id);
+        setTipoCliente(clienteRes.data.tipoCliente || clienteRes.data.tipo_cliente || "Com Contrato");
       } else {
         console.error('Cliente não encontrado para este usuário');
         setLoading(false);
@@ -115,16 +133,17 @@ export default function ClienteIntervencoes() {
   };
 
   const temContratoAtivo = contratos.some(c => c.status === "Ativo");
+  const podeCriar = temContratoAtivo || tipoCliente === "Sem Contrato";
 
   const handleAbrirModal = () => {
-    if (!temContratoAtivo) return;
+    if (!podeCriar) return;
     setModalAberto(true);
   };
 
   const handleCriarIntervencao = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!temContratoAtivo) {
+    if (!podeCriar) {
       toast.error('Não é possível criar intervenções sem um contrato ativo.');
       return;
     }
@@ -238,9 +257,9 @@ export default function ClienteIntervencoes() {
         </div>
         <button
           onClick={handleAbrirModal}
-          disabled={!temContratoAtivo}
-          title={!temContratoAtivo ? "É necessário ter um contrato ativo para criar intervenções" : ""}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium ${temContratoAtivo
+          disabled={!podeCriar}
+          title={!podeCriar ? "É necessário ter um contrato ativo para criar intervenções" : ""}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium ${podeCriar
             ? "bg-purple-600 hover:bg-purple-700 text-white"
             : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
@@ -250,7 +269,7 @@ export default function ClienteIntervencoes() {
         </button>
       </div>
 
-      {!temContratoAtivo && (
+      {!podeCriar && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
           <FileText className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div>
@@ -323,7 +342,7 @@ export default function ClienteIntervencoes() {
       ) : (
         <div className="space-y-4">
           {intervencoesFiltradas.map(intervencao => (
-            <div key={intervencao.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div key={intervencao.id} id={`intervencao-${intervencao.id}`} className={`bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-all ${destaqueId === intervencao.id ? "border-blue-500 ring-2 ring-blue-400 bg-blue-50" : "border-gray-200"}`}>
               <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                 <div className="flex-1">
                   <div className="flex items-start gap-3 mb-3">
@@ -343,6 +362,22 @@ export default function ClienteIntervencoes() {
                             {new Date(intervencao.dataCriacao).toLocaleDateString('pt-AO')}
                           </span>
                         </div>
+                        {intervencao.dataResolucao && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">Resolvido:</span>
+                            <span className="font-medium text-green-700">
+                              {new Date(intervencao.dataResolucao).toLocaleString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        )}
+                        {intervencao.dataFecho && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-500">Fechado:</span>
+                            <span className="font-medium text-blue-700">
+                              {new Date(intervencao.dataFecho).toLocaleString('pt-AO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        )}
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500">Técnico:</span>
                           <span className="font-medium text-gray-900">ID {intervencao.tecnicoNome}</span>
