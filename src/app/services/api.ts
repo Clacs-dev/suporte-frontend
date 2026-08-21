@@ -1,7 +1,7 @@
 const API_BASE_URL =
-  window.location.hostname === "https://3434df.electrosoftwares.com"
+  window.location.hostname === "localhost"
     ? "http://localhost:8001"
-    : "https://suporte-backend-l9hm.onrender.com";
+    : "https://3434df.electrosoftwares.com";
 // Obter token de autenticação do localStorage
 function getAuthToken() {
   return localStorage.getItem('access_token');
