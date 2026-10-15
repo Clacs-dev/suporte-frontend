@@ -10,6 +10,9 @@ import AdminTecnicos from "./pages/admin/Tecnicos";
 import AdminRelatorios from "./pages/admin/Relatorios";
 import AdminAgenda from "./pages/admin/Agenda";
 import AdminPerfil from "./pages/admin/Perfil";
+import AdminFinanceiro from "./pages/admin/Financeiro";
+import AdminCobrancas from "./pages/admin/Cobrancas";
+import AdminMensagens from "./pages/admin/Mensagens";
 import TecnicoDashboard from "./pages/tecnico/Dashboard";
 import TecnicoIntervencoes from "./pages/tecnico/Intervencoes";
 import TecnicoIntervencaoManual from "./pages/tecnico/IntervencaoManual";
@@ -47,6 +50,9 @@ export const router = createBrowserRouter([
       { path: "relatorios", Component: AdminRelatorios },
       { path: "agenda", Component: AdminAgenda },
       { path: "perfil", Component: AdminPerfil },
+      { path: "financeiro", Component: AdminFinanceiro },
+      { path: "cobrancas", Component: AdminCobrancas },
+      { path: "mensagens", Component: AdminMensagens },
     ],
   },
   {
@@ -59,6 +65,7 @@ export const router = createBrowserRouter([
       { path: "intervencoes", Component: TecnicoIntervencoes },
       { path: "intervencoes-manual", Component: TecnicoIntervencaoManual },
       { path: "horas", Component: TecnicoHoras },
+      { path: "mensagens", Component: AdminMensagens },
     ],
   },
   {
@@ -70,6 +77,7 @@ export const router = createBrowserRouter([
       { path: "dashboard", Component: ClienteDashboard },
       { path: "intervencoes", Component: ClienteIntervencoes },
       { path: "contratos", Component: ClienteContratos },
+      { path: "mensagens", Component: AdminMensagens },
 
     ],
   },

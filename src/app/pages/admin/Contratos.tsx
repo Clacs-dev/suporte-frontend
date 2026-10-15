@@ -1,6 +1,7 @@
 import { FileText, Plus, AlertCircle, TrendingUp, Clock, Loader, X, Calendar, DollarSign, Edit, Trash2, Search } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { contratosAPI, clientesAPI } from "../../services/api";
+import { formatarMoedaExibicao } from "../../services/moeda";
 import { toast } from "sonner";
 
 export default function AdminContratos() {
@@ -176,7 +177,7 @@ export default function AdminContratos() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Faturamento Mensal</p>
-              <p className="text-2xl font-bold text-gray-900">Kz {faturamentoMensal.toLocaleString('pt-AO')}</p>
+              <p className="text-2xl font-bold text-gray-900">Kz {formatarMoedaExibicao(faturamentoMensal)}</p>
             </div>
           </div>
         </div>
@@ -259,7 +260,7 @@ export default function AdminContratos() {
                           <DollarSign className="w-4 h-4 text-green-600" />
                           <span className="text-gray-500">Valor:</span>
                           <span className="font-semibold text-green-600">
-                            Kz {(contrato.valorMensal ?? contrato.valor_mensal).toLocaleString('pt-AO')}/mês
+                            Kz {formatarMoedaExibicao(contrato.valorMensal ?? contrato.valor_mensal)}/mês
                           </span>
                         </div>
                       )}

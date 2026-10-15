@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { statsAPI, intervencoesAPI, contratosAPI, tecnicosAPI } from "../../services/api";
+import { formatarMoedaExibicao } from "../../services/moeda";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -95,7 +96,7 @@ export default function AdminDashboard() {
               <p className="text-sm text-gray-600 mb-1">Contratos Ativos</p>
               <p className="text-3xl font-bold text-gray-900">{stats?.contratosAtivos || 0}</p>
               <p className="text-sm text-gray-500 mt-2">
-                Kz {((stats?.receitaMensal || 0) / 1000).toFixed(0)}k/mês
+                Kz {formatarMoedaExibicao((stats?.receitaMensal || 0) / 1000, 0)}k/mês
               </p>
             </div>
             <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">

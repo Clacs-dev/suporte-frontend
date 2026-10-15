@@ -1,6 +1,7 @@
 import { FileText, ClipboardList, Clock, TrendingUp, Loader } from "lucide-react";
 import { useState, useEffect } from "react";
 import { contratosAPI, intervencoesAPI, clientesAPI } from "../../services/api";
+import { formatarMoedaExibicao } from "../../services/moeda";
 
 export default function ClienteDashboard() {
   const [contratos, setContratos] = useState<any[]>([]);
@@ -190,7 +191,7 @@ export default function ClienteDashboard() {
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Valor Mensal:</span>
                       <span className="font-semibold text-purple-600">
-                        Kz {contrato.valorMensal?.toLocaleString('pt-AO') || 'N/A'}
+                        Kz {contrato.valorMensal != null ? formatarMoedaExibicao(contrato.valorMensal) : 'N/A'}
                       </span>
                     </div>
                   </div>

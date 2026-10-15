@@ -1,8 +1,9 @@
 import { FileText, Clock, Calendar, AlertCircle, Download, Loader, DollarSign } from "lucide-react";
 import { useState, useEffect } from "react";
 import { contratosAPI, intervencoesAPI, clientesAPI } from "../../services/api";
+import { formatarMoedaExibicao } from "../../services/moeda";
 const API_BASE_URL = window.location.hostname === "localhost"
-  ? "http://localhost:8001"
+  ? "http://localhost:8000"
   : "https://suporte-backend-l9hm.onrender.com";
 
 
@@ -207,7 +208,7 @@ export default function ClienteContratos() {
                           <div>
                             <span className="text-gray-500">Valor:</span>
                             <span className="ml-1 font-semibold text-purple-600">
-                              Kz {contrato.valor_mensal.toLocaleString('pt-AO')}/mês
+                              Kz {formatarMoedaExibicao(contrato.valor_mensal)}/mês
                             </span>
                           </div>
                         </div>

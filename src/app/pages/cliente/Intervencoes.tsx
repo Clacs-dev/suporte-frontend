@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router";
 import { intervencoesAPI, clientesAPI, contratosAPI } from "../../services/api";
 import { toast } from "sonner";
 const API_BASE_URL = window.location.hostname === "localhost"
-  ? "http://localhost:8001"
+  ? "http://localhost:8000"
   : "https://suporte-backend-l9hm.onrender.com";
 
 const CLOUD_NAME = "dkcq4gtxp";

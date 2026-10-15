@@ -1,9 +1,10 @@
-import { Download, BarChart3, PieChart, TrendingUp, Loader } from "lucide-react";
+import { Download, BarChart3, PieChart, TrendingUp, Loader, Wallet } from "lucide-react";
 import { useState, useEffect } from "react";
-import { clientesAPI, contratosAPI, intervencoesAPI, registrosHorasAPI } from "../../services/api";
+import { clientesAPI, contratosAPI, intervencoesAPI, registrosHorasAPI, financeiroAPI } from "../../services/api";
+import { formatarMoedaExibicao } from "../../services/moeda";
 
 const API_BASE_URL = window.location.hostname === "localhost"
-  ? "http://localhost:8001"
+  ? "http://localhost:8000"
   : "https://suporte-backend-l9hm.onrender.com";
 
 export default function AdminRelatorios() {
@@ -11,7 +12,14 @@ export default function AdminRelatorios() {
   const [contratos, setContratos] = useState<any[]>([]);
   const [intervencoes, setIntervencoes] = useState<any[]>([]);
   const [registrosHoras, setRegistrosHoras] = useState<any[]>([]);
+  const [contas, setContas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filtros do relatório financeiro
+  const [finTipo, setFinTipo] = useState("Todas");
+  const [finConta, setFinConta] = useState("");
+  const [finDataInicio, setFinDataInicio] = useState("");
+  const [finDataFim, setFinDataFim] = useState("");
 
   useEffect(() => {
     carregarDados();
@@ -20,22 +28,39 @@ export default function AdminRelatorios() {
   const carregarDados = async () => {
     try {
       setLoading(true);
-      const [clientesRes, contratosRes, intervencoesRes, registrosRes] = await Promise.all([
+      const [clientesRes, contratosRes, intervencoesRes, registrosRes, financeiroRes] = await Promise.all([
         clientesAPI.listar(),
         contratosAPI.listar(),
         intervencoesAPI.listar(),
-        registrosHorasAPI.listar()
+        registrosHorasAPI.listar(),
+        financeiroAPI.listar()
       ]);
 
       if (clientesRes.success) setClientes(clientesRes.data);
       if (contratosRes.success) setContratos(contratosRes.data);
       if (intervencoesRes.success) setIntervencoes(intervencoesRes.data);
       if (registrosRes.success) setRegistrosHoras(registrosRes.data);
+      if (financeiroRes.success) setContas(financeiroRes.data.contas || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const nomeConta = (id: string) => {
+    const c = contas.find(x => x.id === id);
+    return c ? (c.numero_conta ? `${c.banco} · ${c.numero_conta}` : c.banco) : id;
+  };
+
+  const abrirRelatorioFinanceiro = () => {
+    const params = new URLSearchParams();
+    if (finTipo !== "Todas") params.set("tipo", finTipo);
+    if (finConta) params.set("conta", finConta);
+    if (finDataInicio) params.set("data_inicio", finDataInicio);
+    if (finDataFim) params.set("data_fim", finDataFim);
+    const qs = params.toString();
+    window.open(`${API_BASE_URL}/relatorios/financeiro${qs ? `?${qs}` : ""}`, '_blank');
   };
 
   if (loading) {
@@ -114,7 +139,7 @@ export default function AdminRelatorios() {
             </div>
             <div>
               <p className="text-sm text-gray-600">Faturamento Mensal</p>
-              <p className="text-2xl font-bold text-gray-900">Kz {faturamentoTotal.toLocaleString('pt-AO')}</p>
+              <p className="text-2xl font-bold text-gray-900">Kz {formatarMoedaExibicao(faturamentoTotal)}</p>
               <p className="text-xs text-gray-600 mt-1">{contratosAtivos} contratos</p>
             </div>
           </div>
@@ -260,6 +285,54 @@ export default function AdminRelatorios() {
                 </div>
               </div>
             ))}
+        </div>
+      </div>
+
+      {/* Relatório Financeiro */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Wallet className="w-5 h-5 text-green-600" />
+          <h2 className="text-lg font-semibold text-gray-900">Relatório Financeiro</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Tipo de movimento</label>
+            <select value={finTipo} onChange={(e) => setFinTipo(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="Todas">Todas</option>
+              <option value="Entrada">Entradas</option>
+              <option value="Saida">Saídas</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Conta bancária</label>
+            <select value={finConta} onChange={(e) => setFinConta(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Todas</option>
+              {contas.map(c => <option key={c.id} value={c.id}>{nomeConta(c.id)}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Data início</label>
+            <input type="date" value={finDataInicio} onChange={(e) => setFinDataInicio(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Data fim</label>
+            <input type="date" value={finDataFim} onChange={(e) => setFinDataFim(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            onClick={abrirRelatorioFinanceiro}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+            <Download className="w-5 h-5" />
+            Exportar Relatório Financeiro (PDF)
+          </button>
+          <span className="text-xs text-gray-500 self-center max-w-xs">
+            Gera um PDF com entradas, saídas e saldo do período conforme os filtros seleccionados.
+          </span>
         </div>
       </div>
     </div>

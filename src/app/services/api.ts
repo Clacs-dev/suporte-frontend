@@ -1,7 +1,7 @@
 const API_BASE_URL =
   window.location.hostname === "localhost"
-    ? "http://localhost:8001"
-    : "https://3434df.electrosoftwares.com";
+    ? "http://localhost:8000"
+    : "https://suporte-backend-l9hm.onrender.com";
 // Obter token de autenticação do localStorage
 function getAuthToken() {
   return localStorage.getItem('access_token');
@@ -468,6 +468,155 @@ export const devAPI = {
   migrateStatus: async () => {
     return fetchAPI('/migrate-status', {
       method: 'POST',
+    });
+  },
+};
+
+export const financeiroAPI = {
+  listar: async () => {
+    return fetchAPI('/financeiro');
+  },
+  criar: async (movimento: {
+    tipo: string;
+    descricao?: string;
+    valor: number;
+    numero?: string;
+    categoria?: string;
+    forma_pagamento?: string;
+    data?: string;
+    conta_bancaria_id?: string;
+  }) => {
+    return fetchAPI('/financeiro', {
+      method: 'POST',
+      body: JSON.stringify(movimento),
+    });
+  },
+  eliminar: async (id: string) => {
+    return fetchAPI(`/financeiro/${id}`, {
+      method: 'DELETE',
+    });
+  },
+  atualizar: async (id: string, movimento: {
+    descricao?: string;
+    valor?: number;
+    categoria?: string;
+    forma_pagamento?: string;
+    data?: string;
+    conta_bancaria_id?: string;
+  }) => {
+    return fetchAPI(`/financeiro/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(movimento),
+    });
+  },
+  contas: {
+    criar: async (conta: { banco: string; numero_conta?: string; titular?: string }) => {
+      return fetchAPI('/financeiro/contas', {
+        method: 'POST',
+        body: JSON.stringify(conta),
+      });
+    },
+    atualizar: async (id: string, conta: { banco: string; numero_conta?: string; titular?: string }) => {
+      return fetchAPI(`/financeiro/contas/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(conta),
+      });
+    },
+    eliminar: async (id: string) => {
+      return fetchAPI(`/financeiro/contas/${id}`, {
+        method: 'DELETE',
+      });
+    },
+  },
+  categorias: {
+    listar: async () => {
+      return fetchAPI('/financeiro/categorias');
+    },
+    criar: async (categoria: { nome: string }) => {
+      return fetchAPI('/financeiro/categorias', {
+        method: 'POST',
+        body: JSON.stringify(categoria),
+      });
+    },
+    atualizar: async (id: string, categoria: { nome: string }) => {
+      return fetchAPI(`/financeiro/categorias/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(categoria),
+      });
+    },
+    eliminar: async (id: string) => {
+      return fetchAPI(`/financeiro/categorias/${id}`, {
+        method: 'DELETE',
+      });
+    },
+  },
+};
+
+// ====================================
+// COBRANÇAS
+// ====================================
+
+export const cobrancasAPI = {
+  mapa: async (mes: number, ano: number) => {
+    return fetchAPI(`/cobrancas/mapa?mes=${mes}&ano=${ano}`);
+  },
+  historico: async () => {
+    return fetchAPI('/cobrancas/historico');
+  },
+  listar: async (mes?: number, ano?: number) => {
+    const params = new URLSearchParams();
+    if (mes) params.set("mes", String(mes));
+    if (ano) params.set("ano", String(ano));
+    const qs = params.toString();
+    return fetchAPI(`/cobrancas${qs ? `?${qs}` : ""}`);
+  },
+  salvar: async (cobranca: {
+    cliente_id: string;
+    mes: number;
+    ano: number;
+    pago: boolean;
+    valor?: number;
+    data_pagamento?: string | null;
+    observacao?: string | null;
+  }) => {
+    return fetchAPI('/cobrancas', {
+      method: 'POST',
+      body: JSON.stringify(cobranca),
+    });
+  },
+  eliminar: async (id: string) => {
+    return fetchAPI(`/cobrancas/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
+export const mensagensAPI = {
+  contactos: async () => {
+    return fetchAPI('/mensagens/contactos');
+  },
+  naoLidas: async () => {
+    return fetchAPI('/mensagens/nao-lidas');
+  },
+  listar: async (caixa: 'entrada' | 'saida' | 'todas' = 'entrada') => {
+    return fetchAPI(`/mensagens?caixa=${caixa}`);
+  },
+  conversa: async (outroUsuarioId: string) => {
+    return fetchAPI(`/mensagens/conversa/${outroUsuarioId}`);
+  },
+  enviar: async (mensagem: {
+    destinatario_id: string;
+    assunto?: string;
+    conteudo: string;
+  }) => {
+    return fetchAPI('/mensagens', {
+      method: 'POST',
+      body: JSON.stringify(mensagem),
+    });
+  },
+  marcarComoLida: async (id: string) => {
+    return fetchAPI(`/mensagens/${id}/ler`, {
+      method: 'PUT',
     });
   },
 };

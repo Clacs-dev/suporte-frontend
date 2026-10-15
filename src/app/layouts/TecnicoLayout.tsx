@@ -7,7 +7,9 @@ import {
   Bell,
   LogOut,
   Menu,
-  X, FileText
+  X, FileText,
+  MessageSquare
+
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { tecnicosAPI } from "../services/api";
@@ -43,6 +45,7 @@ export default function TecnicoLayout() {
     { path: "/tecnico", label: "Dashboard", icon: LayoutDashboard },
     { path: "/tecnico/intervencoes", label: "Intervenções", icon: ClipboardList },
     { path: "/tecnico/horas", label: "Horas", icon: Clock },
+    { path: "/tecnico/mensagens", label: "Mensagens", icon: MessageSquare },
   ];
 
   const isActive = (path: string) => {

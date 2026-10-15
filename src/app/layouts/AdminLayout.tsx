@@ -11,8 +11,11 @@ import {
   Bell,
   LogOut,
   Menu,
+  Wallet,
   X,
-  Calendar
+  Calendar,
+  HandCoins,
+  MessageSquare
 } from "lucide-react";
 import { useState } from "react";
 
@@ -30,6 +33,9 @@ export default function AdminLayout() {
     { path: "/admin/intervencoes", label: "Intervenções", icon: ClipboardList },
     { path: "/admin/tecnicos", label: "Técnicos", icon: Wrench },
     { path: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
+    { path: "/admin/financeiro", label: "Financeiro", icon: Wallet },
+    { path: "/admin/cobrancas", label: "Cobranças", icon: HandCoins },
+    { path: "/admin/mensagens", label: "Mensagens", icon: MessageSquare },
 
   ];
 

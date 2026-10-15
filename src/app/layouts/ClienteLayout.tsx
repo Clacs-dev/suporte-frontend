@@ -7,7 +7,9 @@ import {
   Bell,
   LogOut,
   Menu,
-  X
+  X,
+  MessageSquare
+
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { clientesAPI } from "../services/api";
@@ -43,6 +45,7 @@ export default function ClienteLayout() {
     { path: "/cliente", label: "Dashboard", icon: LayoutDashboard },
     { path: "/cliente/intervencoes", label: "Minhas Intervenções", icon: ClipboardList },
     { path: "/cliente/contratos", label: "Meus Contratos", icon: FileText },
+    { path: "/cliente/mensagens", label: "Mensagens", icon: MessageSquare },
   ];
 
   const isActive = (path: string) => {
